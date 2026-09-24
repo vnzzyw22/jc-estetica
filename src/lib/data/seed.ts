@@ -2,7 +2,8 @@ import type { AvailabilityRow, ContentRow, FaqItem, Service, ServiceCategory, Se
 
 // Espelha supabase/seed.sql. Tudo entre colchetes é placeholder a ser trocado pelo painel.
 
-export type Store = { [K in keyof Tables]: Tables[K][] };
+type PublicTable = "settings" | "availability" | "services" | "gallery" | "faq" | "site_content";
+export type Store = { [K in PublicTable]: Tables[K][] };
 
 const SETTINGS_ID = "00000000-0000-0000-0000-000000000001";
 
@@ -20,6 +21,7 @@ const settings: Settings = {
   max_days_ahead: 60,
   buffer_minutes: 0,
   auto_confirm: false,
+  evaluation_duration_minutes: 60,
   timezone: "America/Sao_Paulo",
 };
 
@@ -42,28 +44,35 @@ const availability: AvailabilityRow[] = [
   weekday(6, "09:00", "13:00"),
 ];
 
-const service = (n: number, slug: string, name: string, category: ServiceCategory, duration: number, description: string): Service => ({
-  id: `00000000-0000-0000-0000-0000000001${String(n).padStart(2, "0")}`,
+/** Catálogo real da Jennifer. Duração provisória (60 min), sem descrição nem valor (ver supabase/seed.sql). */
+const CATALOG: Array<[string, string, ServiceCategory]> = [
+  ["limpeza-de-pele", "Limpeza de Pele", "facial_olhar"],
+  ["peeling-dermaplaning", "Peeling Dermaplaning", "facial_olhar"],
+  ["brow-lamination", "Brow Lamination", "facial_olhar"],
+  ["lash-lifting", "Lash Lifting", "facial_olhar"],
+  ["design-de-sobrancelhas", "Design de Sobrancelhas", "facial_olhar"],
+  ["lipo-sem-corte", "Lipo sem Corte", "corporal_modelagem"],
+  ["hidrolipoclasia", "Hidrolipoclasia", "corporal_modelagem"],
+  ["massagem-modeladora", "Massagem Modeladora", "corporal_modelagem"],
+  ["drenagem-linfatica", "Drenagem Linfática", "corporal_modelagem"],
+  ["massagem-relaxante", "Massagem Relaxante", "terapias_bem_estar"],
+  ["ventosaterapia", "Ventosaterapia", "terapias_bem_estar"],
+  ["calm-vibes", "Calm Vibes", "terapias_bem_estar"],
+];
+
+const services: Service[] = CATALOG.map(([slug, name, category], i) => ({
+  id: `00000000-0000-0000-0000-0000000001${String(i + 1).padStart(2, "0")}`,
   slug,
   name,
   category,
-  description,
-  indication: "[Indicação real]",
-  duration_minutes: duration,
+  description: null,
+  indication: null,
+  duration_minutes: 60,
   price: null,
   image_url: null,
   active: true,
-  display_order: n,
-});
-
-const services: Service[] = [
-  service(1, "procedimento-facial-1", "[Procedimento facial 1]", "facial", 60, "[Descrição real do procedimento]"),
-  service(2, "procedimento-facial-2", "[Procedimento facial 2]", "facial", 90, "[Descrição real do procedimento]"),
-  service(3, "procedimento-facial-3", "[Procedimento facial 3]", "facial", 45, "[Descrição real do procedimento]"),
-  service(4, "procedimento-corporal-1", "[Procedimento corporal 1]", "corporal", 60, "[Descrição real do procedimento]"),
-  service(5, "procedimento-corporal-2", "[Procedimento corporal 2]", "corporal", 75, "[Descrição real do procedimento]"),
-  service(6, "protocolo-1", "[Protocolo 1]", "protocolos", 120, "[Descrição real do protocolo]"),
-];
+  display_order: i + 1,
+}));
 
 const content: ContentRow[] = [
   ["hero.tagline", "Cuidado com precisão, feito por gente."],
@@ -101,9 +110,6 @@ export function buildSeed(): Store {
     settings: [settings],
     availability,
     services,
-    clients: [],
-    appointments: [],
-    blocked_slots: [],
     gallery: [],
     faq,
     site_content: content,

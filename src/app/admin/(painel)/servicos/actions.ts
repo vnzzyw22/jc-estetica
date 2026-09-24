@@ -6,7 +6,7 @@ import { slugify } from "@/lib/format";
 import type { ServiceCategory } from "@/lib/types";
 
 const PATHS = ["/", "/servicos", "/agendamento", "/admin/servicos"];
-const CATEGORIES: ServiceCategory[] = ["facial", "corporal", "tratamentos", "protocolos"];
+const CATEGORIES: ServiceCategory[] = ["facial_olhar", "corporal_modelagem", "terapias_bem_estar"];
 
 export async function saveServiceAction(_prev: ActionState, fd: FormData): Promise<ActionState> {
   const name = str(fd, "name");

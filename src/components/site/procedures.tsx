@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useId, useState } from "react";
-import { CATEGORY_LABEL, formatDuration, formatPrice } from "@/lib/format";
+import { CATEGORY_SHORT, formatDuration, formatPrice } from "@/lib/format";
 import type { Service, ServiceCategory } from "@/lib/types";
 
-const ORDER: ServiceCategory[] = ["facial", "corporal", "tratamentos", "protocolos"];
+const ORDER: ServiceCategory[] = ["facial_olhar", "corporal_modelagem", "terapias_bem_estar"];
 
 /**
  * Catálogo editorial: índice de categorias à esquerda, procedimentos em linhas grandes à direita.
@@ -14,7 +14,7 @@ const ORDER: ServiceCategory[] = ["facial", "corporal", "tratamentos", "protocol
 export function Procedures({ services }: { services: Service[] }) {
   const tabsId = useId();
   const categories = ORDER.filter((c) => services.some((s) => s.category === c));
-  const [current, setCurrent] = useState<ServiceCategory>(categories[0] ?? "facial");
+  const [current, setCurrent] = useState<ServiceCategory>(categories[0] ?? "facial_olhar");
 
   if (!services.length) {
     return <p className="t-lead text-cafe">Os procedimentos serão publicados em breve.</p>;
@@ -56,7 +56,7 @@ export function Procedures({ services }: { services: Service[] }) {
                 selected ? "text-espresso" : "text-cafe/60 hover:text-espresso"
               }`}
             >
-              <span className={`relative ${selected ? "after:absolute after:inset-x-0 after:-bottom-1 after:h-px after:bg-bisturi" : ""}`}>{CATEGORY_LABEL[c]}</span>
+              <span className={`relative ${selected ? "after:absolute after:inset-x-0 after:-bottom-1 after:h-px after:bg-bisturi" : ""}`}>{CATEGORY_SHORT[c]}</span>
               <span className="tnum font-sans text-[0.8125rem] text-cafe">{count}</span>
             </button>
           );

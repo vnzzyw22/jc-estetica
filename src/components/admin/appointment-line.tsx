@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { StatusBadge } from "@/components/admin/ui";
 import { dateISOFromEpoch, dayLabel, timeLabel } from "@/lib/date";
-import { formatDuration } from "@/lib/format";
+import { KIND_LABEL, formatDuration } from "@/lib/format";
 import type { AppointmentDetail } from "@/lib/types";
 
 /** Uma linha de agendamento: horário, cliente, serviço, status. Leva ao detalhe. */
@@ -16,7 +16,7 @@ export function AppointmentLine({ a, showDate = false }: { a: AppointmentDetail;
         <span className="min-w-0">
           <span className="block truncate">{a.client?.name ?? "Cliente removido"}</span>
           <span className="t-small block truncate">
-            {a.service?.name ?? "Procedimento removido"} · {formatDuration(Math.round((new Date(a.ends_at).getTime() - new Date(a.starts_at).getTime()) / 60_000))}
+            {a.service?.name ?? KIND_LABEL[a.kind]} · {formatDuration(Math.round((new Date(a.ends_at).getTime() - new Date(a.starts_at).getTime()) / 60_000))}
           </span>
         </span>
         <StatusBadge status={a.status} />

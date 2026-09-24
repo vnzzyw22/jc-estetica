@@ -66,8 +66,8 @@ export default async function ServicesAdminPage({ searchParams }: { searchParams
                 <input name="name" defaultValue={s?.name} className="field" required />
               </Field>
               <Field label="Categoria">
-                <select name="category" defaultValue={s?.category ?? "facial"} className="field">
-                  {(["facial", "corporal", "tratamentos", "protocolos"] as const).map((c) => (
+                <select name="category" defaultValue={s?.category ?? "facial_olhar"} className="field">
+                  {(["facial_olhar", "corporal_modelagem", "terapias_bem_estar"] as const).map((c) => (
                     <option key={c} value={c}>
                       {CATEGORY_LABEL[c]}
                     </option>

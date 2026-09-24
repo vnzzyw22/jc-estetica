@@ -21,7 +21,7 @@ type Done = Extract<CreateBookingResult, { ok: true }>;
 
 const STEP_TITLES: Record<Step, string> = { 1: "Procedimento", 2: "Data e horário", 3: "Seus dados" };
 
-const CATEGORY_ORDER = ["facial", "corporal", "tratamentos", "protocolos"] as const;
+const CATEGORY_ORDER = ["facial_olhar", "corporal_modelagem", "terapias_bem_estar"] as const;
 
 export function BookingFlow({ services, today, maxDate, initialServiceId }: BookingFlowProps) {
   const currentMonth = today.slice(0, 7);

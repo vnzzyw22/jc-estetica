@@ -4,6 +4,8 @@ import type { NextConfig } from "next";
 const supabaseHostname = process.env.NEXT_PUBLIC_SUPABASE_URL ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname : undefined;
 
 const nextConfig: NextConfig = {
+  // Postgres local de desenvolvimento (WASM): não empacotar, carregar do node_modules.
+  serverExternalPackages: ["@electric-sql/pglite"],
   experimental: {
     // Upload de fotos pelo painel (limite do bucket: 5 MB).
     serverActions: { bodySizeLimit: "6mb" },

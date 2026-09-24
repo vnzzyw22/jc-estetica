@@ -7,7 +7,8 @@ export type ActionState = { ok?: boolean; message?: string; error?: string } | n
 const DB_MESSAGE: Record<string, string> = {
   "23505": "Já existe um registro com esse valor (nome, endereço ou telefone repetido).",
   "23P01": "Esse horário conflita com outro agendamento.",
-  "23503": "Existem agendamentos vinculados. Desative em vez de excluir.",
+  "23503": "Existem registros vinculados. Desative em vez de excluir.",
+  "23001": "Existem registros vinculados (agendamentos, tratamentos ou pagamentos). Desative em vez de excluir.",
   not_configured: "Supabase não configurado: alterações indisponíveis neste ambiente.",
   blocked: "Esse horário está bloqueado na agenda.",
   service_not_found: "Procedimento não encontrado.",

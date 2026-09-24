@@ -5,7 +5,7 @@ import { Empty, PageTitle, StatusBadge } from "@/components/admin/ui";
 import { listAppointmentDetails } from "@/lib/admin-data";
 import { requireAdmin } from "@/lib/auth";
 import { addDaysISO, dateTimeLabel, isValidDateISO, isoAt, todayISO } from "@/lib/date";
-import { STATUS_LABEL, formatDuration } from "@/lib/format";
+import { KIND_LABEL, STATUS_LABEL, formatDuration } from "@/lib/format";
 import type { AppointmentStatus } from "@/lib/types";
 
 export const metadata = { title: "Agendamentos" };
@@ -75,7 +75,7 @@ export default async function AppointmentsPage({ searchParams }: { searchParams:
                   {a.client?.name ?? "Cliente removido"}
                 </Link>
                 <p className="t-small truncate">
-                  {a.service?.name ?? "Procedimento removido"} · {formatDuration(Math.round((new Date(a.ends_at).getTime() - new Date(a.starts_at).getTime()) / 60_000))}
+                  {a.service?.name ?? KIND_LABEL[a.kind]} · {formatDuration(Math.round((new Date(a.ends_at).getTime() - new Date(a.starts_at).getTime()) / 60_000))}
                   {a.source === "admin" ? " · manual" : ""}
                 </p>
               </div>

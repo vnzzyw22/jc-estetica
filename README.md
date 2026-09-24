@@ -19,12 +19,12 @@ npm run dev                   # http://localhost:3000
 
 ### Modo local (sem Supabase)
 
-Se `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` estiverem vazias, o app usa um banco em arquivo (`.data/db.json`, ignorado pelo git), com os mesmos dados do `supabase/seed.sql`. Serve para desenvolver e testar o fluxo completo sem internet.
+Se `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` estiverem vazias, o app usa um **Postgres local real** (PGlite, em `.data/pgdata`, ignorado pelo git) que roda as **mesmas migrações** do Supabase. Assim as regras de agenda, triagem, tratamentos e financeiro são idênticas às de produção.
 
-- Painel: `/admin/login`, senha definida em `ADMIN_LOCAL_PASSWORD` (padrão `dev-admin`).
+- Painel: `/admin/login`, senha `ADMIN_LOCAL_PASSWORD` (padrão `dev-admin`).
 - Uploads vão para `public/uploads` (ignorado pelo git).
-- **Em produção o modo local não persiste nada nem autentica ninguém**: se as variáveis do Supabase faltarem, o site aparece com o seed em memória, o agendamento e o painel recusam escrita.
-- Apagar `.data/db.json` restaura o seed.
+- Dados demonstrativos (nomes fictícios, telefones inválidos): `npm run demo:load` / `npm run demo:clear`. Zerar tudo: `npm run db:reset`. **Pare o `npm run dev` antes**: o banco local aceita um processo por vez.
+- **Em produção o modo local não existe**: sem as variáveis do Supabase o site mostra só o conteúdo público de exemplo, e agendamento, triagem e painel recusam qualquer escrita.
 
 ## Variáveis de ambiente
 
@@ -41,8 +41,9 @@ Nenhuma chave secreta é usada no código. **Não use a `service_role` neste pro
 
 1. Crie o projeto.
 2. No **SQL Editor**, rode na ordem:
-   1. [supabase/migrations/20260924120000_schema_inicial.sql](supabase/migrations/20260924120000_schema_inicial.sql) (tabelas, RLS, função `create_booking`, view `busy_slots`, bucket `media`)
-   2. [supabase/seed.sql](supabase/seed.sql) (configurações, horários padrão, serviços e FAQ **placeholders**)
+   1. [supabase/migrations/20260924120000_schema_inicial.sql](supabase/migrations/20260924120000_schema_inicial.sql) (site, agenda, clientes, RLS, `create_booking`, bucket `media`)
+   2. [supabase/migrations/20260925120000_fundacao_clinica.sql](supabase/migrations/20260925120000_fundacao_clinica.sql) (triagem, anamnese, tratamentos, sessões, evolução, financeiro; requer a extensão `btree_gist`)
+   3. [supabase/seed.sql](supabase/seed.sql) (**produção**: configurações, horários padrão, os 12 serviços reais, categorias de despesa e placeholders de conteúdo; sem dados fictícios)
    (Ou, com a CLI: `supabase link` + `supabase db push`, depois rode o seed.)
 3. **Authentication → Users → Add user**: crie o login da Jennifer (e-mail + senha).
 4. Torne essa conta administradora. No SQL Editor, com o `id` do usuário criado:
@@ -62,7 +63,14 @@ Nenhuma chave secreta é usada no código. **Não use a `service_role` neste pro
 
 ### Tabelas
 
-`admin_profiles`, `settings` (linha única), `availability` (semana), `services`, `clients`, `appointments`, `blocked_slots`, `gallery`, `faq`, `site_content` (chave/valor de textos e fotos).
+Site e agenda: `admin_profiles`, `settings`, `availability`, `services`, `clients`, `appointments`, `blocked_slots`, `gallery`, `faq`, `site_content`.
+Clínica e financeiro: `professionals`, `screenings`, `consent_terms`, `anamneses`, `treatment_packages`, `package_services`, `treatments`, `treatment_sessions`, `evolutions`, `payments`, `expense_categories`, `expenses` (+ views `treatment_progress` e `cash_flow`).
+
+Modelo completo, regras, checklist de segurança para rodar no Supabase e riscos: [docs/DADOS-E-AMBIENTE.md](docs/DADOS-E-AMBIENTE.md).
+
+## Testes
+
+`npm run test:sql` roda 47 testes das regras de banco num Postgres real (RLS, conflito de agenda, triagem, pacote → sessões → financeiro). Antes de publicar: `npm run lint && npm run typecheck && npm run test:sql && npm run build`.
 
 ## Painel (`/admin`)
 
@@ -73,7 +81,7 @@ Dashboard, Agenda (dia, semana, mês), Agendamentos (criar, confirmar, concluir,
 Nada abaixo foi inventado; tudo aparece no site como `[placeholder]` até ser preenchido pelo painel:
 
 - Fotos: hero, filosofia (2), retrato profissional, espaço, galeria e resultados (**nenhuma foto real ainda**)
-- Nomes, descrições, indicações, durações e valores dos procedimentos (`/admin/servicos`; os 6 do seed são exemplos)
+- Descrição, indicação e valor dos 12 procedimentos, e a **duração real** de cada um (`/admin/servicos`; o seed usa 60 min provisórios)
 - Formação, trajetória, abordagem e experiência da Jennifer (`/admin/conteudo`)
 - Filosofia de atendimento: o texto atual é um **rascunho** derivado do briefing
 - WhatsApp, Instagram, e-mail, endereço e cidade (`/admin/configuracoes`)

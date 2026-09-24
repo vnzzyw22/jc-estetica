@@ -17,7 +17,7 @@ export default async function AppointmentDetailPage({ params }: { params: Promis
   const appt = await db.get("appointments", id);
   if (!appt) notFound();
 
-  const [client, service] = await Promise.all([db.get("clients", appt.client_id), db.get("services", appt.service_id)]);
+  const [client, service] = await Promise.all([db.get("clients", appt.client_id), appt.service_id ? db.get("services", appt.service_id) : Promise.resolve(null)]);
   const dateISO = dateISOFromEpoch(new Date(appt.starts_at).getTime());
   const time = timeLabel(appt.starts_at);
   const minutes = Math.round((new Date(appt.ends_at).getTime() - new Date(appt.starts_at).getTime()) / 60_000);
@@ -41,7 +41,7 @@ export default async function AppointmentDetailPage({ params }: { params: Promis
               ["Status", <StatusBadge key="s" status={appt.status} />],
               ["Data", dayLabel(dateISO)],
               ["Horário", `${time} (${formatDuration(minutes)})`],
-              ["Procedimento", service?.name ?? "Removido"],
+              ["Procedimento", service?.name ?? (appt.kind === "evaluation" ? "Avaliação" : appt.kind === "return" ? "Retorno" : "Removido")],
               ["Valor", formatPrice(service?.price)],
               ["Origem", appt.source === "admin" ? "Criado no painel" : "Site"],
             ].map(([label, value]) => (

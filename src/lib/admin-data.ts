@@ -2,7 +2,7 @@ import type { Db } from "@/lib/data/db";
 import { DbError } from "@/lib/data/db";
 import { isoAt } from "@/lib/date";
 import { digitsOnly } from "@/lib/format";
-import type { AppointmentDetail, AppointmentStatus } from "@/lib/types";
+import type { AppointmentDetail, AppointmentKind, AppointmentStatus } from "@/lib/types";
 
 interface ListOptions {
   fromISO?: string;
@@ -24,7 +24,7 @@ export async function listAppointmentDetails(db: Db, { fromISO, toISO, status }:
   ]);
   const clientById = new Map(clients.map((c) => [c.id, c]));
   const serviceById = new Map(services.map((s) => [s.id, s]));
-  return appointments.map((a) => ({ ...a, client: clientById.get(a.client_id) ?? null, service: serviceById.get(a.service_id) ?? null }));
+  return appointments.map((a) => ({ ...a, client: clientById.get(a.client_id) ?? null, service: a.service_id ? (serviceById.get(a.service_id) ?? null) : null }));
 }
 
 async function assertNotBlocked(db: Db, startISO: string, endISO: string): Promise<void> {
@@ -37,7 +37,9 @@ interface ManualAppointment {
   name?: string;
   phone?: string;
   email?: string | null;
-  serviceId: string;
+  serviceId: string | null;
+  /** Padrão: serviço avulso. Avaliação e retorno não exigem serviço. */
+  kind?: AppointmentKind;
   dateISO: string;
   time: string;
   status: AppointmentStatus;
@@ -46,8 +48,10 @@ interface ManualAppointment {
 
 /** Cria agendamento pelo painel: reutiliza cliente por telefone, checa bloqueios; o banco barra conflitos. */
 export async function createManualAppointment(db: Db, input: ManualAppointment): Promise<string> {
-  const service = await db.get("services", input.serviceId);
-  if (!service) throw new DbError("service_not_found");
+  const kind = input.kind ?? "service";
+  const service = input.serviceId ? await db.get("services", input.serviceId) : null;
+  if (kind === "service" && !service) throw new DbError("service_not_found");
+  const durationMinutes = service?.duration_minutes ?? (await db.list("settings", { limit: 1 }))[0].evaluation_duration_minutes;
 
   let clientId = input.clientId ?? null;
   if (!clientId) {
@@ -61,12 +65,13 @@ export async function createManualAppointment(db: Db, input: ManualAppointment):
   }
 
   const startISO = isoAt(input.dateISO, input.time);
-  const endISO = new Date(new Date(startISO).getTime() + service.duration_minutes * 60_000).toISOString();
+  const endISO = new Date(new Date(startISO).getTime() + durationMinutes * 60_000).toISOString();
   await assertNotBlocked(db, startISO, endISO);
 
   const created = await db.insert("appointments", {
     client_id: clientId,
-    service_id: service.id,
+    service_id: service?.id ?? null,
+    kind,
     starts_at: startISO,
     ends_at: endISO,
     status: input.status,

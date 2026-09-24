@@ -1,4 +1,4 @@
--- Seed inicial. Tudo entre colchetes é PLACEHOLDER e deve ser substituído pelo painel
+-- Seed de PRODUÇÃO: sem dados fictícios. Tudo entre colchetes é PLACEHOLDER e deve ser substituído pelo painel
 -- (/admin/servicos, /admin/conteudo, /admin/faq, /admin/configuracoes).
 -- Horários abaixo são um padrão de partida, não o expediente real da Jennifer.
 
@@ -15,14 +15,30 @@ insert into public.availability (weekday, is_open, open_time, close_time, break_
   (6, true, '09:00', '13:00', null, null)
 on conflict (weekday) do nothing;
 
-insert into public.services (slug, name, category, description, indication, duration_minutes, price, display_order) values
-  ('procedimento-facial-1', '[Procedimento facial 1]', 'facial', '[Descrição real do procedimento]', '[Indicação real]', 60, null, 1),
-  ('procedimento-facial-2', '[Procedimento facial 2]', 'facial', '[Descrição real do procedimento]', '[Indicação real]', 90, null, 2),
-  ('procedimento-facial-3', '[Procedimento facial 3]', 'facial', '[Descrição real do procedimento]', '[Indicação real]', 45, null, 3),
-  ('procedimento-corporal-1', '[Procedimento corporal 1]', 'corporal', '[Descrição real do procedimento]', '[Indicação real]', 60, null, 4),
-  ('procedimento-corporal-2', '[Procedimento corporal 2]', 'corporal', '[Descrição real do procedimento]', '[Indicação real]', 75, null, 5),
-  ('protocolo-1', '[Protocolo 1]', 'protocolos', '[Descrição real do protocolo]', '[Indicação real]', 120, null, 6)
+-- Catálogo real informado pela Jennifer. DURAÇÃO (60 min) é PROVISÓRIA: o sistema exige um valor para calcular
+-- horários; confirme cada uma em /admin/servicos. Descrição, indicação e valor ficam vazios de propósito.
+insert into public.services (slug, name, category, duration_minutes, display_order) values
+  ('limpeza-de-pele', 'Limpeza de Pele', 'facial_olhar', 60, 1),
+  ('peeling-dermaplaning', 'Peeling Dermaplaning', 'facial_olhar', 60, 2),
+  ('brow-lamination', 'Brow Lamination', 'facial_olhar', 60, 3),
+  ('lash-lifting', 'Lash Lifting', 'facial_olhar', 60, 4),
+  ('design-de-sobrancelhas', 'Design de Sobrancelhas', 'facial_olhar', 60, 5),
+  ('lipo-sem-corte', 'Lipo sem Corte', 'corporal_modelagem', 60, 6),
+  ('hidrolipoclasia', 'Hidrolipoclasia', 'corporal_modelagem', 60, 7),
+  ('massagem-modeladora', 'Massagem Modeladora', 'corporal_modelagem', 60, 8),
+  ('drenagem-linfatica', 'Drenagem Linfática', 'corporal_modelagem', 60, 9),
+  ('massagem-relaxante', 'Massagem Relaxante', 'terapias_bem_estar', 60, 10),
+  ('ventosaterapia', 'Ventosaterapia', 'terapias_bem_estar', 60, 11),
+  ('calm-vibes', 'Calm Vibes', 'terapias_bem_estar', 60, 12)
 on conflict (slug) do nothing;
+
+-- Categorias de despesa (só rótulos; nenhum valor).
+insert into public.expense_categories (name, kind) values
+  ('Aluguel', 'fixed'), ('Internet e telefone', 'fixed'), ('Sistemas e assinaturas', 'fixed'),
+  ('Energia e água', 'fixed'),
+  ('Produtos e cosméticos', 'variable'), ('Materiais descartáveis', 'variable'), ('Insumos', 'variable'),
+  ('Outros gastos', 'variable')
+on conflict (name) do nothing;
 
 insert into public.site_content (key, value) values
   ('hero.tagline', 'Cuidado com precisão, feito por gente.'),

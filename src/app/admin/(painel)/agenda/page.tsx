@@ -3,7 +3,7 @@ import { PageTitle, StatusBadge } from "@/components/admin/ui";
 import { listAppointmentDetails } from "@/lib/admin-data";
 import { requireAdmin } from "@/lib/auth";
 import { addDaysISO, dateISOFromEpoch, dayLabel, isValidDateISO, isoAt, monthBounds, monthName, timeLabel, todayISO, weekdayOf, weekdayShort } from "@/lib/date";
-import { BLOCK_KIND_LABEL } from "@/lib/format";
+import { BLOCK_KIND_LABEL, KIND_LABEL } from "@/lib/format";
 import type { AppointmentDetail, BlockedSlot } from "@/lib/types";
 
 export const metadata = { title: "Agenda" };
@@ -63,7 +63,7 @@ function DayItems({ dateISO, appts, blocks, compact }: { dateISO: string; appts:
             <span className="tnum font-medium">{timeLabel(a.starts_at)}</span> {a.client?.name ?? "—"}
             {!compact && (
               <span className="t-small flex flex-wrap items-center gap-x-3">
-                {a.service?.name} <StatusBadge status={a.status} />
+                {a.service?.name ?? KIND_LABEL[a.kind]} <StatusBadge status={a.status} />
               </span>
             )}
           </Link>

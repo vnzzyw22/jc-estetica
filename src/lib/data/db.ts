@@ -10,8 +10,10 @@ export interface Query<T> {
 }
 
 export interface BookingInput {
-  serviceId: string;
+  serviceId: string | null;
   startsAtISO: string;
+  /** Sem serviço = avaliação/retorno (usa a duração das configurações). */
+  kind?: "service" | "evaluation" | "return";
   name: string;
   phone: string;
   email?: string;
@@ -46,6 +48,8 @@ export interface Db {
   /** Caminho de escrita do público. Lança DbError com `code: BookingErrorCode`. */
   createBooking(input: BookingInput): Promise<string>;
   uploadMedia(file: File, folder: string): Promise<string>;
+  /** Chama uma função do banco (regras atômicas: triagem, ativar tratamento, agendar sessão…). */
+  rpc<T = unknown>(fn: string, args?: Record<string, unknown>): Promise<T>;
 }
 
 export const PK_COLUMN: Record<TableName, string> = {
@@ -58,6 +62,21 @@ export const PK_COLUMN: Record<TableName, string> = {
   gallery: "id",
   faq: "id",
   site_content: "key",
+  professionals: "id",
+  consent_terms: "id",
+  screenings: "id",
+  anamneses: "id",
+  treatment_packages: "id",
+  package_services: "id",
+  treatments: "id",
+  treatment_sessions: "id",
+  evolutions: "id",
+  payments: "id",
+  expense_categories: "id",
+  expenses: "id",
+  // Views: sem escrita; a chave existe só para satisfazer o tipo.
+  treatment_progress: "treatment_id",
+  cash_flow: "source_id",
 };
 
 export function bookingErrorFrom(message: string, code?: string): BookingErrorCode {
@@ -66,6 +85,7 @@ export function bookingErrorFrom(message: string, code?: string): BookingErrorCo
     "service_not_found",
     "invalid_name",
     "invalid_phone",
+    "invalid_kind",
     "too_soon",
     "too_far",
     "outside_hours",

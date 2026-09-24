@@ -33,12 +33,29 @@ export function slugify(value: string): string {
 }
 
 export const CATEGORY_LABEL: Record<string, string> = {
+  facial_olhar: "Estética facial & olhar",
+  corporal_modelagem: "Estética corporal & modelagem",
+  terapias_bem_estar: "Terapias integradas & bem-estar",
   facial: "Facial",
   corporal: "Corporal",
-  tratamentos: "Tratamentos",
-  protocolos: "Protocolos",
   espaco: "Espaço",
   profissional: "Profissional",
+};
+
+/** Rótulo curto das categorias (abas e filtros, onde o nome completo não cabe). */
+export const CATEGORY_SHORT: Record<string, string> = {
+  facial_olhar: "Facial & olhar",
+  corporal_modelagem: "Corporal & modelagem",
+  terapias_bem_estar: "Terapias & bem-estar",
+};
+
+/** Nome do tipo de agendamento quando não há serviço do catálogo. */
+export const KIND_LABEL: Record<string, string> = {
+  evaluation: "Avaliação",
+  return: "Retorno",
+  session: "Sessão de tratamento",
+  service: "Serviço",
+  other: "Agendamento",
 };
 
 export const STATUS_LABEL: Record<string, string> = {

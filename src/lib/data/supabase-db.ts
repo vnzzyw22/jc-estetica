@@ -66,9 +66,17 @@ export function createSupabaseDb(client: SupabaseClient): Db {
         p_phone: input.phone,
         p_email: input.email ?? null,
         p_notes: input.notes ?? null,
+        p_kind: input.kind ?? "service",
       });
       if (error) throw new DbError(bookingErrorFrom(error.message, error.code), error.message);
       return data as string;
+    },
+
+    async rpc<T>(fn: string, args: Record<string, unknown> = {}) {
+      const { data, error } = await client.rpc(fn, args);
+      // RAISE do banco chega como P0001 com o código na mensagem (ex.: plan_exists).
+      if (error) throw new DbError(error.code === "P0001" ? error.message : (error.code ?? "unknown"), error.message);
+      return data as T;
     },
 
     async uploadMedia(file, folder) {

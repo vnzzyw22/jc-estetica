@@ -14,6 +14,7 @@ const ERROR_MESSAGE: Record<BookingErrorCode, string> = {
   service_not_found: "Esse procedimento não está mais disponível. Escolha outro.",
   invalid_name: "Informe seu nome.",
   invalid_phone: "Informe um WhatsApp válido, com DDD.",
+  invalid_kind: "Tipo de agendamento inválido.",
   too_soon: "Esse horário já não aceita agendamento. Escolha um mais adiante.",
   too_far: "Ainda não abrimos agenda para essa data.",
   outside_hours: "Esse horário está fora do atendimento. Escolha outro.",
