@@ -10,6 +10,13 @@ const nextConfig: NextConfig = {
     // Upload de fotos pelo painel (limite do bucket: 5 MB).
     serverActions: { bodySizeLimit: "6mb" },
   },
+  // A rota antiga /servicos virou /tratamentos.
+  async redirects() {
+    return [
+      { source: "/servicos", destination: "/tratamentos", permanent: true },
+      { source: "/servicos/:slug", destination: "/tratamentos/:slug", permanent: true },
+    ];
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: supabaseHostname

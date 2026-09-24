@@ -10,6 +10,14 @@ export function formatDuration(minutes: number): string {
   return m ? `${h}h${String(m).padStart(2, "0")}` : `${h}h`;
 }
 
+/** Fatos exibíveis de um serviço: só o que é conhecido (duração confirmada, valor). */
+export function serviceFacts(s: { duration_minutes: number; duration_confirmed: boolean; price: number | null }): string[] {
+  const facts: string[] = [];
+  if (s.duration_confirmed) facts.push(formatDuration(s.duration_minutes));
+  if (s.price != null) facts.push(formatPrice(s.price));
+  return facts;
+}
+
 export function digitsOnly(value: string): string {
   return value.replace(/\D/g, "");
 }

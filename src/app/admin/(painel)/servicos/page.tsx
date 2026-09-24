@@ -41,7 +41,7 @@ export default async function ServicesAdminPage({ searchParams }: { searchParams
                       </span>
                     </span>
                     <span className="tnum t-small sm:text-right">
-                      {formatDuration(item.duration_minutes)} · {formatPrice(item.price)}
+                      {formatDuration(item.duration_minutes)}{item.duration_confirmed ? "" : " (provisória)"} · {formatPrice(item.price)}
                     </span>
                   </Link>
                 </li>
@@ -80,7 +80,14 @@ export default async function ServicesAdminPage({ searchParams }: { searchParams
               <Field label="Duração (minutos)">
                 <input name="duration_minutes" type="number" min={5} step={5} defaultValue={s?.duration_minutes ?? 60} className="field" required />
               </Field>
-              <Field label="Valor (R$)" hint="Vazio mostra “sob avaliação”.">
+              <label className="flex items-start gap-3 sm:col-span-2">
+                <input type="checkbox" name="duration_confirmed" defaultChecked={s?.duration_confirmed ?? false} className="mt-1 h-5 w-5 accent-[var(--color-bisturi)]" />
+                <span>
+                  Duração confirmada (exibir no site)
+                  <span className="t-small block">Desmarcada, o site não mostra a duração; a agenda usa o valor acima do mesmo jeito.</span>
+                </span>
+              </label>
+              <Field label="Valor (R$)" hint="Vazio: o site não mostra valor.">
                 <input name="price" inputMode="decimal" defaultValue={s?.price ?? ""} className="field" />
               </Field>
               <Field label="Descrição" className="sm:col-span-2">

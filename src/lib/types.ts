@@ -39,6 +39,8 @@ export interface Service {
   description: string | null;
   indication: string | null;
   duration_minutes: number;
+  /** Duração real confirmada pela Jennifer. Só então o site a exibe. */
+  duration_confirmed: boolean;
   price: number | null;
   image_url: string | null;
   active: boolean;

@@ -6,7 +6,7 @@ import { Calendar } from "@/components/booking/calendar";
 import { Summary } from "@/components/booking/summary";
 import { createBooking, getDaySlots, getMonthAvailability, type CreateBookingResult } from "@/app/(site)/agendamento/actions";
 import { dayLabel, shiftMonth } from "@/lib/date";
-import { CATEGORY_LABEL, formatDuration, formatPrice, maskPhone } from "@/lib/format";
+import { CATEGORY_LABEL, maskPhone, serviceFacts } from "@/lib/format";
 import type { Service } from "@/lib/types";
 
 interface BookingFlowProps {
@@ -240,7 +240,11 @@ export function BookingFlow({ services, today, maxDate, initialServiceId }: Book
                                 {s.indication && <span className="mt-0.5 block text-[0.875rem] text-cafe">{s.indication}</span>}
                               </span>
                               <span className="tnum text-[0.95rem] text-cafe sm:text-right">
-                                <span>{formatDuration(s.duration_minutes)}</span>{" "}<span className="ml-3">{formatPrice(s.price)}</span>
+                                {serviceFacts(s).map((f) => (
+                                  <span key={f} className="mr-3 last:mr-0">
+                                    {f}
+                                  </span>
+                                ))}
                               </span>
                             </button>
                           </li>

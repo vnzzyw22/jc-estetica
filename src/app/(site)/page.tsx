@@ -5,6 +5,7 @@ import { Closing } from "@/components/site/closing";
 import { FaqList } from "@/components/site/faq-list";
 import { GalleryStrip } from "@/components/site/gallery-strip";
 import { Hero } from "@/components/site/hero";
+import { Journey } from "@/components/site/journey";
 import { Philosophy } from "@/components/site/philosophy";
 import { Procedures } from "@/components/site/procedures";
 import { getContent, getFaq, getGallery, getServices, getSettings } from "@/lib/queries";
@@ -19,12 +20,13 @@ export default async function HomePage() {
     <>
       <Hero settings={settings} content={content} />
       <Philosophy content={content} />
+      <Journey />
 
-      <section data-section="Procedimentos" className="bg-seda">
+      <section data-section="Tratamentos" className="bg-seda">
         <div className="wrap py-[var(--spacing-section)]">
           <div className="mb-14 grid gap-4 lg:mb-20 lg:grid-cols-12 lg:gap-x-6">
-            <h2 className="t-h1 lg:col-span-8">Procedimentos</h2>
-            <p className="max-w-[40ch] text-cafe lg:col-span-4 lg:self-end">Escolha uma categoria. Duração e valor aparecem antes de você agendar.</p>
+            <h2 className="t-h1 lg:col-span-8">Tratamentos</h2>
+            <p className="max-w-[40ch] text-cafe lg:col-span-4 lg:self-end">Três frentes de cuidado. Se ficar em dúvida por onde começar, faça a triagem.</p>
           </div>
           <Procedures services={services} />
         </div>

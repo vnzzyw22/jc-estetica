@@ -6,16 +6,16 @@ import { getServices } from "@/lib/queries";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "Procedimentos de estética facial e corporal",
-  description: "Procedimentos de estética facial e corporal com duração e valor à vista. Escolha e agende online.",
-  alternates: { canonical: "/servicos" },
+  title: "Tratamentos de estética facial e corporal",
+  description: "Estética facial e olhar, corporal e modelagem, terapias integradas e bem-estar. Conheça os tratamentos da Jennifer Camila.",
+  alternates: { canonical: "/tratamentos" },
 };
 
-export default async function ServicesPage() {
+export default async function TreatmentsPage() {
   const services = await getServices();
   return (
     <>
-      <PageHeader title="Procedimentos" section="Procedimentos" lead="Escolha uma categoria. Duração e valor aparecem antes de você agendar." />
+      <PageHeader title="Tratamentos" section="Tratamentos" lead="Três frentes de cuidado. Se ficar em dúvida por onde começar, faça a triagem." />
       <section className="wrap pb-[var(--spacing-section)]">
         <Procedures services={services} />
       </section>

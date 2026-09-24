@@ -68,6 +68,7 @@ const services: Service[] = CATALOG.map(([slug, name, category], i) => ({
   description: null,
   indication: null,
   duration_minutes: 60,
+  duration_confirmed: false,
   price: null,
   image_url: null,
   active: true,

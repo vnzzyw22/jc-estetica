@@ -5,7 +5,7 @@ import { addDaysISO, todayISO } from "@/lib/date";
 
 export const metadata: Metadata = {
   title: "Agendar horário",
-  description: "Escolha o procedimento, a data e o horário e agende online com Jennifer Camila.",
+  description: "Escolha o tratamento, a data e o horário e agende online com Jennifer Camila.",
   alternates: { canonical: "/agendamento" },
 };
 

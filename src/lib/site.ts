@@ -4,7 +4,7 @@ export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3
 export const LOCALITY_PLACEHOLDER = "[Localidade]";
 
 export const NAV_LINKS = [
-  { href: "/servicos", label: "Procedimentos" },
+  { href: "/tratamentos", label: "Tratamentos" },
   { href: "/sobre", label: "Sobre" },
   { href: "/galeria", label: "Galeria" },
   { href: "/faq", label: "Perguntas" },

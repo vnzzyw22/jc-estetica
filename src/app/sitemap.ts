@@ -6,9 +6,9 @@ export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const services = await getServices().catch(() => []);
-  const fixed = ["", "/servicos", "/agendamento", "/sobre", "/galeria", "/faq", "/contato"];
+  const fixed = ["", "/tratamentos", "/triagem", "/agendamento", "/sobre", "/galeria", "/faq", "/contato"];
   return [
     ...fixed.map((path) => ({ url: `${SITE_URL}${path}`, changeFrequency: "monthly" as const, priority: path === "" ? 1 : 0.7 })),
-    ...services.map((s) => ({ url: `${SITE_URL}/servicos/${s.slug}`, changeFrequency: "monthly" as const, priority: 0.6 })),
+    ...services.map((s) => ({ url: `${SITE_URL}/tratamentos/${s.slug}`, changeFrequency: "monthly" as const, priority: 0.6 })),
   ];
 }

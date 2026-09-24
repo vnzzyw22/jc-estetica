@@ -57,14 +57,14 @@ export function Nav({ name }: { name: string }) {
               {l.label}
             </Link>
           ))}
-          <Link href="/agendamento" className="btn btn-sm">
-            Agendar horário
+          <Link href="/triagem" className="btn btn-sm">
+            Descobrir meu tratamento
           </Link>
         </nav>
 
         <div className="flex items-center gap-4 lg:hidden">
-          <Link href="/agendamento" className="link-draw text-[0.95rem] font-medium">
-            Agendar
+          <Link href="/triagem" className="link-draw text-[0.95rem] font-medium">
+            Meu tratamento
           </Link>
           <button
             ref={openRef}
@@ -97,7 +97,7 @@ export function Nav({ name }: { name: string }) {
             </button>
           </div>
           <nav aria-label="Menu principal" className="wrap flex flex-1 flex-col justify-center gap-1 pb-16">
-            {[{ href: "/", label: "Início" }, ...NAV_LINKS, { href: "/agendamento", label: "Agendar horário" }].map((l) => (
+            {[{ href: "/", label: "Início" }, ...NAV_LINKS, { href: "/triagem", label: "Descobrir meu tratamento" }, { href: "/agendamento", label: "Agendar horário" }].map((l) => (
               <Link
                 key={l.href}
                 href={l.href}

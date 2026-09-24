@@ -45,11 +45,11 @@ export function Hero({ settings, content }: { settings: Settings; content: Conte
         </p>
 
         <div className="mt-9 flex flex-wrap items-center gap-x-8 gap-y-4">
-          <Link href="/agendamento" className="btn">
-            Agendar horário
+          <Link href="/triagem" className="btn">
+            Descobrir meu tratamento
           </Link>
-          <Link href="/servicos" className="link-draw font-medium">
-            Ver procedimentos
+          <Link href="/tratamentos" className="link-draw font-medium">
+            Conhecer os tratamentos
           </Link>
         </div>
 

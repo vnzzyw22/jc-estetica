@@ -43,7 +43,8 @@ Nenhuma chave secreta é usada no código. **Não use a `service_role` neste pro
 2. No **SQL Editor**, rode na ordem:
    1. [supabase/migrations/20260924120000_schema_inicial.sql](supabase/migrations/20260924120000_schema_inicial.sql) (site, agenda, clientes, RLS, `create_booking`, bucket `media`)
    2. [supabase/migrations/20260925120000_fundacao_clinica.sql](supabase/migrations/20260925120000_fundacao_clinica.sql) (triagem, anamnese, tratamentos, sessões, evolução, financeiro; requer a extensão `btree_gist`)
-   3. [supabase/seed.sql](supabase/seed.sql) (**produção**: configurações, horários padrão, os 12 serviços reais, categorias de despesa e placeholders de conteúdo; sem dados fictícios)
+   3. [supabase/migrations/20260925130000_servicos_exibicao.sql](supabase/migrations/20260925130000_servicos_exibicao.sql) (só exibe duração confirmada)
+   4. [supabase/seed.sql](supabase/seed.sql) (**produção**: configurações, horários padrão, os 12 serviços reais, categorias de despesa e placeholders de conteúdo; sem dados fictícios)
    (Ou, com a CLI: `supabase link` + `supabase db push`, depois rode o seed.)
 3. **Authentication → Users → Add user**: crie o login da Jennifer (e-mail + senha).
 4. Torne essa conta administradora. No SQL Editor, com o `id` do usuário criado:
@@ -70,7 +71,7 @@ Modelo completo, regras, checklist de segurança para rodar no Supabase e riscos
 
 ## Testes
 
-`npm run test:sql` roda 47 testes das regras de banco num Postgres real (RLS, conflito de agenda, triagem, pacote → sessões → financeiro). Antes de publicar: `npm run lint && npm run typecheck && npm run test:sql && npm run build`.
+`npm run test:sql` roda 48 testes das regras de banco num Postgres real (RLS, conflito de agenda, triagem, pacote → sessões → financeiro). Antes de publicar: `npm run lint && npm run typecheck && npm run test:sql && npm run build`.
 
 ## Painel (`/admin`)
 
@@ -81,7 +82,8 @@ Dashboard, Agenda (dia, semana, mês), Agendamentos (criar, confirmar, concluir,
 Nada abaixo foi inventado; tudo aparece no site como `[placeholder]` até ser preenchido pelo painel:
 
 - Fotos: hero, filosofia (2), retrato profissional, espaço, galeria e resultados (**nenhuma foto real ainda**)
-- Descrição, indicação e valor dos 12 procedimentos, e a **duração real** de cada um (`/admin/servicos`; o seed usa 60 min provisórios)
+- Descrição, indicação e valor dos 12 tratamentos, e a **duração real** de cada um (`/admin/servicos`; o seed usa 60 min provisórios e o site **não os exibe** até você marcar "Duração confirmada")
+- Texto do consentimento da triagem (a página `/triagem` é provisória até a Etapa 3)
 - Formação, trajetória, abordagem e experiência da Jennifer (`/admin/conteudo`)
 - Filosofia de atendimento: o texto atual é um **rascunho** derivado do briefing
 - WhatsApp, Instagram, e-mail, endereço e cidade (`/admin/configuracoes`)
@@ -105,7 +107,7 @@ Fuso horário: o cálculo de horários assume `America/Sao_Paulo` (UTC-3, sem ho
 ## Estrutura
 
 ```
-src/app/(site)/        páginas públicas (início, servicos, agendamento, sobre, galeria, faq, contato)
+src/app/(site)/        páginas públicas (início, tratamentos, triagem, agendamento, sobre, galeria, faq, contato)
 src/app/admin/         login e painel (rotas protegidas por src/proxy.ts + requireAdmin)
 src/components/        site/, booking/, admin/
 src/lib/data/          camada de dados: Supabase e banco local, mesma interface (Db)

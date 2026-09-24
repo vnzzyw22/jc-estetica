@@ -52,6 +52,11 @@ describe("catálogo e seed", () => {
     assert.ok(r.rows.every((x) => x.com_preco === 0 && x.com_desc === 0));
   });
 
+  test("duração do seed é provisória: nenhuma vem como confirmada (o site não a exibe)", async () => {
+    const r = await db.query("select count(*) filter (where duration_confirmed)::int confirmadas from services");
+    assert.equal(r.rows[0].confirmadas, 0);
+  });
+
   test("categorias de despesa fixas e variáveis existem, sem valores", async () => {
     const r = await db.query("select kind, count(*)::int n from expense_categories group by kind order by kind");
     assert.equal(r.rows.length, 2);

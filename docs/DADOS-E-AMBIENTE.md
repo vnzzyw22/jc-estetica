@@ -29,10 +29,11 @@ Só quatro. **Nenhuma é secreta e nenhuma chave privada (`service_role`) é usa
 
 1. `supabase/migrations/20260924120000_schema_inicial.sql` — site, agenda, clientes, RLS, `create_booking`.
 2. `supabase/migrations/20260925120000_fundacao_clinica.sql` — triagem, anamnese, pacotes, tratamentos, sessões, evolução, pagamentos, despesas, profissionais, consentimento.
-3. `supabase/seed.sql` — **produção**: configurações, horários padrão, 12 serviços reais, categorias de despesa, placeholders de conteúdo. Nenhum cliente, triagem ou valor.
-4. Criar o usuário no Auth e `insert into admin_profiles (user_id) values ('<uuid>')`.
+3. `supabase/migrations/20260925130000_servicos_exibicao.sql` — `services.duration_confirmed` (o site só exibe duração confirmada).
+4. `supabase/seed.sql` — **produção**: configurações, horários padrão, 12 serviços reais, categorias de despesa, placeholders de conteúdo. Nenhum cliente, triagem ou valor.
+5. Criar o usuário no Auth e `insert into admin_profiles (user_id) values ('<uuid>')`.
 
-Dados demonstrativos ficam em `supabase/demo/` e **nunca** entram no passo 3 (ver seção 6).
+Dados demonstrativos ficam em `supabase/demo/` e **nunca** entram no passo 4 (ver seção 6).
 
 ### O que a migração 2 muda no que já existe
 
@@ -123,7 +124,7 @@ Comandos locais: `npm run demo:load`, `npm run demo:clear`, `npm run db:reset`. 
 
 ## 7. Testes
 
-`npm run test:sql` executa 47 testes em Postgres real (PGlite com as migrações verdadeiras e as permissões padrão do Supabase reproduzidas): RLS por papel (anônimo, autenticado sem perfil, admin), conflito de agenda, triagem, `create_booking`, fluxo pacote → sessões → agenda → financeiro, cobrança por sessão, `cash_flow` e o seed demo. Cobrem regras de banco; **não substituem** validar num Supabase real (seção 5).
+`npm run test:sql` executa 48 testes em Postgres real (PGlite com as migrações verdadeiras e as permissões padrão do Supabase reproduzidas): RLS por papel (anônimo, autenticado sem perfil, admin), conflito de agenda, triagem, `create_booking`, fluxo pacote → sessões → agenda → financeiro, cobrança por sessão, `cash_flow` e o seed demo. Cobrem regras de banco; **não substituem** validar num Supabase real (seção 5).
 
 ## 8. Riscos conhecidos
 

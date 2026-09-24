@@ -12,8 +12,9 @@ interface SummaryProps {
 export function Summary({ service, dateISO, time }: SummaryProps) {
   const rows: Array<[string, string | null]> = [
     ["Procedimento", service?.name ?? null],
-    ["Duração", service ? formatDuration(service.duration_minutes) : null],
-    ["Valor", service ? formatPrice(service.price) : null],
+    // Duração provisória e valor vazio não aparecem: nada de "sob avaliação" repetido.
+    ...(service?.duration_confirmed ? ([["Duração", formatDuration(service.duration_minutes)]] as Array<[string, string | null]>) : []),
+    ...(service && service.price != null ? ([["Valor", formatPrice(service.price)]] as Array<[string, string | null]>) : []),
     ["Data", dateISO ? dayLabel(dateISO) : null],
     ["Horário", time],
   ];

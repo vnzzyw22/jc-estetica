@@ -38,5 +38,5 @@ export async function saveSettingsAction(_prev: ActionState, fd: FormData): Prom
       auto_confirm: bool(fd, "auto_confirm"),
     });
     return "Configurações salvas.";
-  }, ["/", "/agendamento", "/contato", "/sobre", "/faq", "/servicos", "/admin/configuracoes"]);
+  }, ["/", "/agendamento", "/contato", "/sobre", "/faq", "/tratamentos", "/admin/configuracoes"]);
 }

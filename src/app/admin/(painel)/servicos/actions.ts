@@ -5,7 +5,7 @@ import { bool, guarded, imageFile, num, optNum, optStr, str, type ActionState } 
 import { slugify } from "@/lib/format";
 import type { ServiceCategory } from "@/lib/types";
 
-const PATHS = ["/", "/servicos", "/agendamento", "/admin/servicos"];
+const PATHS = ["/", "/tratamentos", "/agendamento", "/admin/servicos"];
 const CATEGORIES: ServiceCategory[] = ["facial_olhar", "corporal_modelagem", "terapias_bem_estar"];
 
 export async function saveServiceAction(_prev: ActionState, fd: FormData): Promise<ActionState> {
@@ -32,6 +32,7 @@ export async function saveServiceAction(_prev: ActionState, fd: FormData): Promi
       description: optStr(fd, "description"),
       indication: optStr(fd, "indication"),
       duration_minutes: duration,
+      duration_confirmed: bool(fd, "duration_confirmed"),
       price,
       active: bool(fd, "active"),
       display_order: Math.round(num(fd, "display_order", 0)),

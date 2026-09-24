@@ -195,3 +195,14 @@ Ajustes feitos depois de ver o resultado renderizado:
 - Tells removidos na checagem do quality-gate: travessão espaçado em label ("A — B"), pontos médios em textos meta, `→` no painel.
 - Auditoria de interface: ARIA de grid/radio incorreta trocada por `group` + `aria-pressed`; menu mobile virou `<dialog>` (focus trap, Esc); hierarquia de títulos da /faq; `touch-action`, `color-scheme`, `text-wrap: balance`, `scroll-padding` (barra fixa não cobre foco).
 - Risco que permanece: sem fotos reais, a home é majoritariamente tipografia e blocos nude. A identidade depende das fotografias da Jennifer; reavaliar quando existirem.
+
+## 13. Etapa 2: tratamentos reais e a porta de entrada (triagem)
+
+O site passa a conduzir para **descobrir o tratamento**, e não para escolher um procedimento avulso.
+
+- **CTAs:** principal "Descobrir meu tratamento" (triagem), secundário "Conhecer os tratamentos". Agendar direto continua existindo (avaliação, retorno, tratamento específico), como caminho secundário: botão no menu só para a triagem; "Agendar" aparece nas linhas de tratamento, na seção escura e no fechamento.
+- **Nova seção "Como começa"** (logo após a filosofia): linha do tempo vertical com o modelo de atendimento (Triagem, Avaliação, Plano de tratamento, Sessões e acompanhamento). A linha ecoa a régua do site e a ordem é uma sequência real, então não precisa de numeração.
+- **Tratamentos** (antes "Procedimentos", rota `/tratamentos`, com redirecionamento permanente de `/servicos`): três categorias reais (Estética facial & olhar; corporal & modelagem; terapias integradas & bem-estar). As abas usam rótulos curtos. Linhas editoriais grandes; nada de cards.
+- **Só o que é conhecido:** duração provisória (60 min, exigida pelo sistema para calcular horários) **não aparece**; só a duração marcada como confirmada no painel. Valor vazio não mostra "sob avaliação" repetido. Sem descrição, a linha fica só com o nome. Nenhum "R$ 0,00".
+- **Página do tratamento:** título e ações alinhados às bordas da foto (título no topo, CTAs na base), para o vazio ser composição e não sobra de conteúdo ausente.
+- **/triagem** é provisória até a Etapa 3: explica que a triagem está sendo preparada e oferece agendar ou conversar no WhatsApp.
