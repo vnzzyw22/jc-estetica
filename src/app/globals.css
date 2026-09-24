@@ -1,0 +1,376 @@
+@import "tailwindcss";
+
+/* =========================================================================
+   Design system — Jennifer Camila ("Pele e bisturi")
+   Fonte de verdade: DESIGN-DIRECTION.md. Sem valores soltos nos componentes.
+   ========================================================================= */
+
+@theme {
+  /* Cor */
+  --color-porcelana: #efe9e3;
+  --color-seda: #e4d8cf;
+  --color-nude: #d3b9a9;
+  --color-rose: #b98a7e;
+  --color-espresso: #241a18;
+  --color-cafe: #5a4a44;
+  --color-bisturi: #3e5b4f;
+  --color-alerta: #9b2c2c;
+  --color-linha: rgb(36 26 24 / 0.18);
+  --color-linha-clara: rgb(239 233 227 / 0.22);
+
+  /* Tipografia */
+  --font-serif: var(--font-newsreader), "Iowan Old Style", Georgia, serif;
+  --font-sans: var(--font-hanken), "Segoe UI", system-ui, sans-serif;
+
+  /* Raio e sombra: quase nada, de propósito */
+  --radius-ctl: 2px;
+  --shadow-none: none;
+
+  /* Motion */
+  --ease-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --duration-quick: 240ms;
+  --duration-base: 480ms;
+  --duration-slow: 720ms;
+
+  /* Espaço entre seções e gutter */
+  --spacing-section: clamp(5rem, 10vw, 9rem);
+  --spacing-gutter: clamp(1.25rem, 4.5vw, 4rem);
+}
+
+:root {
+  --rail: 0px;
+  --nav-h: 4.25rem;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --rail: 3.5rem;
+    --nav-h: 5rem;
+  }
+}
+
+html {
+  color-scheme: light;
+  background: var(--color-porcelana);
+  color: var(--color-espresso);
+  scroll-behavior: smooth;
+  /* Nav fixa no topo e barra de agendamento embaixo não podem cobrir o foco. */
+  scroll-padding-top: calc(var(--nav-h) + 1rem);
+  scroll-padding-bottom: 8rem;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100dvh;
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  font-optical-sizing: auto;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--color-bisturi);
+  color: var(--color-porcelana);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-bisturi);
+  outline-offset: 3px;
+  border-radius: var(--radius-ctl);
+}
+
+.on-dark :focus-visible {
+  outline-color: var(--color-porcelana);
+}
+
+button,
+a,
+select,
+summary,
+[role="tab"] {
+  touch-action: manipulation;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+[id] {
+  scroll-margin-top: calc(var(--nav-h) + 1rem);
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* --------------------------- Tipografia ---------------------------------- */
+
+@utility t-name {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-size: clamp(5.25rem, 13.4vw, 13rem);
+  line-height: 0.86;
+  letter-spacing: -0.035em;
+}
+
+@utility t-h1 {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-size: clamp(2.6rem, 6vw, 6rem);
+  line-height: 1;
+  letter-spacing: -0.028em;
+}
+
+@utility t-h2 {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-size: clamp(2.1rem, 4.4vw, 4rem);
+  line-height: 1.04;
+  letter-spacing: -0.022em;
+}
+
+@utility t-h3 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+@utility t-lead {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-size: clamp(1.3rem, 2.1vw, 1.75rem);
+  line-height: 1.4;
+}
+
+@utility t-small {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--color-cafe);
+}
+
+@utility tnum {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Layout: coluna útil respeita a régua no desktop */
+@utility wrap {
+  width: 100%;
+  max-width: 96rem;
+  margin-inline: auto;
+  padding-inline: var(--spacing-gutter);
+  padding-left: calc(var(--spacing-gutter) + var(--rail));
+}
+
+@utility wrap-bleed {
+  padding-left: calc(var(--spacing-gutter) + var(--rail));
+}
+
+/* --------------------------- Botões e links ------------------------------ */
+
+@utility btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 3rem;
+  padding: 0.85rem 1.6rem;
+  border: 1px solid var(--color-espresso);
+  border-radius: var(--radius-ctl);
+  background: var(--color-espresso);
+  color: var(--color-porcelana);
+  font-weight: 500;
+  font-size: 0.975rem;
+  line-height: 1.2;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-quick) var(--ease-soft),
+    border-color var(--duration-quick) var(--ease-soft),
+    color var(--duration-quick) var(--ease-soft);
+  &:hover {
+    background: var(--color-bisturi);
+    border-color: var(--color-bisturi);
+  }
+  &:disabled,
+  &[aria-disabled="true"] {
+    opacity: 0.45;
+    cursor: not-allowed;
+    background: var(--color-espresso);
+    border-color: var(--color-espresso);
+  }
+}
+
+@utility btn-ghost {
+  background: transparent;
+  color: inherit;
+  border-color: currentColor;
+  &:hover {
+    background: var(--color-espresso);
+    color: var(--color-porcelana);
+    border-color: var(--color-espresso);
+  }
+}
+
+.btn.btn-sm {
+  min-height: 2.75rem;
+  padding: 0.55rem 1.2rem;
+}
+
+.on-dark .btn {
+  background: var(--color-porcelana);
+  color: var(--color-espresso);
+  border-color: var(--color-porcelana);
+}
+.on-dark .btn:hover {
+  background: var(--color-nude);
+  border-color: var(--color-nude);
+}
+.on-dark .btn-ghost {
+  background: transparent;
+  color: var(--color-porcelana);
+}
+.on-dark .btn-ghost:hover {
+  background: var(--color-porcelana);
+  color: var(--color-espresso);
+}
+
+/* Link com sublinhado que se desenha da esquerda */
+@utility link-draw {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.15em;
+  text-decoration: none;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 1px;
+  transition: background-size var(--duration-base) var(--ease-soft);
+  &:hover {
+    background-size: 100% 2px;
+  }
+}
+
+/* --------------------------- Formulários --------------------------------- */
+
+@utility field {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--color-linha);
+  border-radius: var(--radius-ctl);
+  background: rgb(255 255 255 / 0.35);
+  color: var(--color-espresso);
+  font: inherit;
+  transition: border-color var(--duration-quick) var(--ease-soft);
+  &::placeholder {
+    color: var(--color-cafe);
+    opacity: 0.7;
+  }
+  &:hover {
+    border-color: var(--color-cafe);
+  }
+  &:focus {
+    border-color: var(--color-bisturi);
+  }
+  &[aria-invalid="true"] {
+    border-color: var(--color-alerta);
+  }
+}
+
+/* --------------------------- Imagem / slot ------------------------------- */
+
+.photo-slot {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-nude);
+}
+
+.photo-slot [data-photo-caption] {
+  position: absolute;
+  inset: auto 2rem 3rem 2rem;
+  color: var(--color-cafe);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+/* --------------------------- Motion -------------------------------------- */
+
+/* Momento orquestrado: as linhas do nome sobem de dentro de uma máscara, uma vez. */
+@keyframes name-rise {
+  from {
+    transform: translateY(105%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.name-mask {
+  display: block;
+  overflow: hidden;
+  padding-block: 0.16em 0.14em;
+  margin-block: -0.16em -0.14em;
+}
+
+.name-line {
+  display: block;
+  animation: name-rise var(--duration-slow) var(--ease-soft) both;
+  animation-delay: var(--d, 0ms);
+}
+
+/* Revelar texto longo: só opacidade */
+.reveal {
+  opacity: 0;
+  transition: opacity var(--duration-slow) var(--ease-soft);
+}
+.reveal[data-in="true"] {
+  opacity: 1;
+}
+
+/* Troca de categoria em Procedimentos */
+@keyframes swap-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.swap-in {
+  animation: swap-in var(--duration-base) var(--ease-soft) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.001ms !important;
+  }
+  .reveal {
+    opacity: 1;
+  }
+}
+
+/* Scrollbar horizontal discreta da galeria */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
