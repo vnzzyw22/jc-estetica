@@ -47,6 +47,7 @@ for (const f of readdirSync(join(ROOT, "supabase/migrations")).filter((f) => f.e
   if (!applied.has(f)) { await db.exec(read(`supabase/migrations/${f}`)); await mark(f); }
 }
 if (!applied.has("__seed")) { await db.exec(read("supabase/seed.sql")); await mark("__seed"); }
+if (!applied.has("__dev_relax_consent")) { await db.exec("update public.settings set screening_requires_consent_term = false"); await mark("__dev_relax_consent"); }
 
 await db.exec(read(cmd === "demo-load" ? "supabase/demo/seed-demo.sql" : "supabase/demo/clear-demo.sql"));
 const n = (await db.query("select count(*)::int n from public.clients where phone like '009%'")).rows[0].n;

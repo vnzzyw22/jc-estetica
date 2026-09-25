@@ -48,6 +48,12 @@ async function migrate(db: PGlite): Promise<void> {
     await applySql(db, "supabase/seed.sql");
     await db.query("insert into public._local_migrations (name) values ('__seed')");
   }
+  // Só aqui (banco local, nunca produção): permite testar a triagem sem termo oficial publicado.
+  // Bancos reais mantêm o padrão do schema (trava LIGADA).
+  if (!applied.has("__dev_relax_consent")) {
+    await db.exec("update public.settings set screening_requires_consent_term = false");
+    await db.query("insert into public._local_migrations (name) values ('__dev_relax_consent')");
+  }
 }
 
 /** O PGlite aceita UM processo por diretório. O lock evita que scripts e servidor se atropelem. */

@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { getPublicDb } from "@/lib/data";
 import { contentWithFallbacks, type ContentMap } from "@/lib/content";
-import type { AvailabilityRow, FaqItem, GalleryItem, Service, Settings } from "@/lib/types";
+import type { AvailabilityRow, ConsentTerm, FaqItem, GalleryItem, Service, Settings } from "@/lib/types";
 
 // Leituras públicas (RLS anônima). `cache` deduplica dentro da mesma requisição.
 
@@ -30,6 +30,12 @@ export const getGallery = cache(async (): Promise<GalleryItem[]> =>
 export const getFaq = cache(async (): Promise<FaqItem[]> =>
   getPublicDb().list("faq", { eq: { active: true }, order: [["display_order", "asc"]] }),
 );
+
+/** Termo de consentimento da triagem em vigor (o público só enxerga o ATIVO, por RLS). */
+export const getActiveScreeningTerm = cache(async (): Promise<ConsentTerm | null> => {
+  const [term] = await getPublicDb().list("consent_terms", { eq: { kind: "screening", active: true }, limit: 1 });
+  return term ?? null;
+});
 
 export const getContent = cache(async (): Promise<ContentMap> =>
   contentWithFallbacks(await getPublicDb().list("site_content")),

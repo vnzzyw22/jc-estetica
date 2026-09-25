@@ -30,10 +30,11 @@ Só quatro. **Nenhuma é secreta e nenhuma chave privada (`service_role`) é usa
 1. `supabase/migrations/20260924120000_schema_inicial.sql` — site, agenda, clientes, RLS, `create_booking`.
 2. `supabase/migrations/20260925120000_fundacao_clinica.sql` — triagem, anamnese, pacotes, tratamentos, sessões, evolução, pagamentos, despesas, profissionais, consentimento.
 3. `supabase/migrations/20260925130000_servicos_exibicao.sql` — `services.duration_confirmed` (o site só exibe duração confirmada).
-4. `supabase/seed.sql` — **produção**: configurações, horários padrão, 12 serviços reais, categorias de despesa, placeholders de conteúdo. Nenhum cliente, triagem ou valor.
-5. Criar o usuário no Auth e `insert into admin_profiles (user_id) values ('<uuid>')`.
+4. `supabase/migrations/20260925140000_triagem_publica.sql` — trava do termo (`settings.screening_requires_consent_term`, **padrão ligado**), `submit_screening` v2 e gatilhos que ligam avaliação à triagem.
+5. `supabase/seed.sql` — **produção**: configurações, horários padrão, 12 serviços reais, categorias de despesa, placeholders de conteúdo. Nenhum cliente, triagem ou valor.
+6. Criar o usuário no Auth e `insert into admin_profiles (user_id) values ('<uuid>')`.
 
-Dados demonstrativos ficam em `supabase/demo/` e **nunca** entram no passo 4 (ver seção 6).
+Dados demonstrativos ficam em `supabase/demo/` e **nunca** entram no passo 5 (ver seção 6).
 
 ### O que a migração 2 muda no que já existe
 
@@ -110,6 +111,15 @@ where p.proname in ('create_booking','submit_screening');
 select extname from pg_extension where extname = 'btree_gist';
 ```
 
+### Triagem pública: como é protegida (Etapa 3)
+
+- **Única via de escrita:** `submit_screening` (`SECURITY DEFINER`); a RLS impede qualquer leitura por anônimos, inclusive da triagem que a própria pessoa acabou de enviar.
+- **Validação em três camadas:** navegador (conforto), ação de servidor (`validateScreening`, com lista fechada de valores; respostas desconhecidas são descartadas) e banco (formato, tamanho, área, limite por telefone).
+- **Trava de produção:** `settings.screening_requires_consent_term = true` (padrão do schema): sem termo **ativo**, o banco recusa (`consent_term_missing`). Só o **banco local** (PGlite) desliga a trava, uma vez, na criação; nunca um banco real.
+- **Estado comandado pela agenda:** agendar avaliação ligada à triagem → `evaluation_scheduled`; concluir → `evaluated` (não retrocede estados mais avançados).
+- **Anti-spam** (`src/lib/antispam.ts`): isca + tempo mínimo (4 s, guardado no rascunho), limite por IP em memória (12/h, melhor esforço), limite por telefone no banco (3/24 h) e Turnstile opcional. **Antes de divulgar o link: ativar o Turnstile** (ou um limitador compartilhado).
+- **Minimização:** a triagem não pergunta medicação, gestação nem histórico clínico; há um campo opcional avisando que isso é conversado na avaliação. O detalhe clínico é da anamnese (Etapa 4).
+
 ## 6. Ambientes e dados demonstrativos
 
 | Ambiente | Banco | Dados |
@@ -124,7 +134,7 @@ Comandos locais: `npm run demo:load`, `npm run demo:clear`, `npm run db:reset`. 
 
 ## 7. Testes
 
-`npm run test:sql` executa 48 testes em Postgres real (PGlite com as migrações verdadeiras e as permissões padrão do Supabase reproduzidas): RLS por papel (anônimo, autenticado sem perfil, admin), conflito de agenda, triagem, `create_booking`, fluxo pacote → sessões → agenda → financeiro, cobrança por sessão, `cash_flow` e o seed demo. Cobrem regras de banco; **não substituem** validar num Supabase real (seção 5).
+`npm run test:sql` executa 59 testes em Postgres real (PGlite com as migrações verdadeiras e as permissões padrão do Supabase reproduzidas): RLS por papel (anônimo, autenticado sem perfil, admin), conflito de agenda, triagem, `create_booking`, fluxo pacote → sessões → agenda → financeiro, cobrança por sessão, `cash_flow` e o seed demo. Cobrem regras de banco; **não substituem** validar num Supabase real (seção 5).
 
 ## 8. Riscos conhecidos
 

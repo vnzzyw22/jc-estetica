@@ -22,6 +22,7 @@ const settings: Settings = {
   buffer_minutes: 0,
   auto_confirm: false,
   evaluation_duration_minutes: 60,
+  screening_requires_consent_term: true,
   timezone: "America/Sao_Paulo",
 };
 

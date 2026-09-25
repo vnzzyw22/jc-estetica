@@ -1,39 +1,55 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { PageHeader } from "@/components/site/page-header";
-import { getSettings } from "@/lib/queries";
+import { ScreeningFlow } from "@/components/screening/screening-flow";
+import { getActiveScreeningTerm, getSettings } from "@/lib/queries";
+import { AREA_OPTIONS, normalizeCampaign, normalizeSource } from "@/lib/screening";
 import { whatsappLink } from "@/lib/whatsapp";
 
 export const metadata: Metadata = {
   title: "Descobrir meu tratamento",
-  description: "Conte o que você procura e a Jennifer indica o caminho. Triagem rápida, sem compromisso.",
+  description: "Conte o que você procura em poucas perguntas. A Jennifer analisa e retorna com o caminho mais indicado para você.",
   alternates: { canonical: "/triagem" },
+  // Página de formulário: não precisa aparecer com parâmetros de campanha nos buscadores.
+  robots: { index: true, follow: true },
 };
 
-// Página provisória: a triagem interativa entra na próxima etapa. Enquanto isso, os dois
-// caminhos que já funcionam ficam à mão.
-export default async function ScreeningPage() {
-  const settings = await getSettings();
-  const wa = whatsappLink(settings.whatsapp, "Olá! Quero descobrir qual tratamento faz sentido para mim.");
+// Lê ?origem= e ?interesse= a cada acesso.
+export const dynamic = "force-dynamic";
+
+type Search = Promise<{ origem?: string; utm_source?: string; campanha?: string; utm_campaign?: string; interesse?: string }>;
+
+export default async function ScreeningPage({ searchParams }: { searchParams: Search }) {
+  const sp = await searchParams;
+  const [settings, term] = await Promise.all([getSettings(), getActiveScreeningTerm()]);
+
+  const rawOrigin = sp.origem ?? sp.utm_source;
+  const origin = rawOrigin ? { source: normalizeSource(rawOrigin), campaign: normalizeCampaign(sp.campanha ?? sp.utm_campaign) ?? undefined } : {};
+  const initialArea = AREA_OPTIONS.some((a) => a.value === sp.interesse) ? sp.interesse : undefined;
+
+  // Sem termo de consentimento publicado, só o ambiente de desenvolvimento deixa enviar
+  // (o banco também recusa em produção).
+  const canSubmit = Boolean(term) || process.env.NODE_ENV !== "production";
 
   return (
-    <>
-      <PageHeader title="Descobrir meu tratamento" section="Triagem" lead="Estamos preparando a triagem: poucas perguntas, uma de cada vez." />
-      <section className="wrap pb-[var(--spacing-section)]">
-        <p className="t-lead max-w-[34ch]">Até lá, você pode conversar direto com a Jennifer ou reservar um horário.</p>
-        <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
-          <Link href="/agendamento" className="btn">
-            Agendar horário
-          </Link>
-          {wa ? (
-            <a href={wa} className="link-draw font-medium" target="_blank" rel="noopener noreferrer">
-              Conversar no WhatsApp
-            </a>
-          ) : (
-            <span className="text-cafe">[WhatsApp a informar]</span>
-          )}
+    <div data-section="Triagem" className="wrap pb-[var(--spacing-section)] pt-8 lg:pt-14">
+      <div className="grid gap-y-8 lg:grid-cols-12 lg:gap-x-6">
+        <div className="lg:col-span-4">
+          <h1 className="t-h1">Descobrir meu tratamento</h1>
+          <p className="mt-6 max-w-[34ch] text-cafe">Antes de escolher um procedimento, a Jennifer quer entender o que você precisa.</p>
         </div>
-      </section>
-    </>
+        <div className="lg:col-span-7 lg:col-start-6">
+          <noscript>
+            <p className="text-cafe">A triagem precisa de JavaScript. Você pode falar direto pelo WhatsApp ou agendar um horário.</p>
+          </noscript>
+          <ScreeningFlow
+            term={term ? { version: term.version, body: term.body } : null}
+            canSubmit={canSubmit}
+            whatsappHref={whatsappLink(settings.whatsapp, "Olá! Quero descobrir qual tratamento faz sentido para mim.")}
+            turnstileSiteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || null}
+            origin={origin}
+            initialArea={initialArea}
+          />
+        </div>
+      </div>
+    </div>
   );
 }

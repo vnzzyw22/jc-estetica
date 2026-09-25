@@ -33,6 +33,7 @@ Se `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` estiverem vazias
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase → Project Settings → API | URL do projeto |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | idem | chave pública (`anon`); a segurança vem das políticas RLS |
 | `NEXT_PUBLIC_SITE_URL` | você | URL final (canonical, sitemap, Open Graph) |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` | opcionais | Cloudflare Turnstile (gratuito) contra spam na triagem; sem as chaves, desligado |
 | `ADMIN_LOCAL_PASSWORD` | só desenvolvimento | senha do painel no modo local |
 
 Nenhuma chave secreta é usada no código. **Não use a `service_role` neste projeto.**
@@ -44,7 +45,8 @@ Nenhuma chave secreta é usada no código. **Não use a `service_role` neste pro
    1. [supabase/migrations/20260924120000_schema_inicial.sql](supabase/migrations/20260924120000_schema_inicial.sql) (site, agenda, clientes, RLS, `create_booking`, bucket `media`)
    2. [supabase/migrations/20260925120000_fundacao_clinica.sql](supabase/migrations/20260925120000_fundacao_clinica.sql) (triagem, anamnese, tratamentos, sessões, evolução, financeiro; requer a extensão `btree_gist`)
    3. [supabase/migrations/20260925130000_servicos_exibicao.sql](supabase/migrations/20260925130000_servicos_exibicao.sql) (só exibe duração confirmada)
-   4. [supabase/seed.sql](supabase/seed.sql) (**produção**: configurações, horários padrão, os 12 serviços reais, categorias de despesa e placeholders de conteúdo; sem dados fictícios)
+   4. [supabase/migrations/20260925140000_triagem_publica.sql](supabase/migrations/20260925140000_triagem_publica.sql) (trava do termo de consentimento e estado da triagem comandado pela agenda)
+   5. [supabase/seed.sql](supabase/seed.sql) (**produção**: configurações, horários padrão, os 12 serviços reais, categorias de despesa e placeholders de conteúdo; sem dados fictícios)
    (Ou, com a CLI: `supabase link` + `supabase db push`, depois rode o seed.)
 3. **Authentication → Users → Add user**: crie o login da Jennifer (e-mail + senha).
 4. Torne essa conta administradora. No SQL Editor, com o `id` do usuário criado:
@@ -71,11 +73,19 @@ Modelo completo, regras, checklist de segurança para rodar no Supabase e riscos
 
 ## Testes
 
-`npm run test:sql` roda 48 testes das regras de banco num Postgres real (RLS, conflito de agenda, triagem, pacote → sessões → financeiro). Antes de publicar: `npm run lint && npm run typecheck && npm run test:sql && npm run build`.
+`npm test` roda os testes unitários da triagem (11) e os de SQL num Postgres real (59: RLS, conflito de agenda, triagem, pacote → sessões → financeiro). Antes de publicar: `npm run lint && npm run typecheck && npm test && npm run build`.
+
+## Triagem pública (`/triagem`)
+
+Cinco passos curtos (queixa, objetivo, contexto, rotina, contato), resumo e confirmação. O rascunho fica só na aba do navegador (`sessionStorage`) e some ao enviar. Cada envio vira uma **triagem** (lead) em `/admin/triagens` e cria o cliente na hora, com nome e telefone só em `clients`.
+
+- **Origem:** use `https://SEU-SITE/triagem?origem=instagram` no link da bio (`&campanha=reels-setembro` para detalhar). A origem é lembrada mesmo que a pessoa passe pela home antes.
+- **Consentimento:** o texto oficial se cadastra em `/admin/consentimento`. **Em produção a triagem não recebe envios enquanto não houver um termo publicado** (o banco recusa). O ambiente local relaxa essa trava só para desenvolvimento.
+- **Anti-spam:** campo-isca, tempo mínimo de preenchimento, limite por IP (melhor esforço), limite por telefone no banco (3 em 24 h) e, opcionalmente, Turnstile. Antes de divulgar o link, ative o Turnstile.
 
 ## Painel (`/admin`)
 
-Dashboard, Agenda (dia, semana, mês), Agendamentos (criar, confirmar, concluir, cancelar, remarcar, excluir), Clientes (histórico e observações), Serviços, Horários, Bloqueios, Galeria (upload), Conteúdo (textos e fotos do site), FAQ, Configurações (WhatsApp, Instagram, endereço, regras de agendamento).
+Dashboard, **Triagens** (lista com filtros, detalhe, estado, observações internas e agendamento de avaliação), Agenda (dia, semana, mês), Agendamentos (criar, confirmar, concluir, cancelar, remarcar, excluir), Clientes (histórico e observações), Serviços, Horários, Bloqueios, Galeria (upload), Conteúdo (textos e fotos do site), FAQ, Consentimento (texto oficial da triagem) e Configurações (WhatsApp, Instagram, endereço, regras de agendamento).
 
 ## Conteúdo que ainda precisa ser informado
 

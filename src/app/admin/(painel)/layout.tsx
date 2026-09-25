@@ -10,7 +10,8 @@ export const metadata: Metadata = { title: { default: "Painel", template: "%s â€
 export const dynamic = "force-dynamic";
 
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {
-  const { user } = await requireAdmin();
+  const { user, db } = await requireAdmin();
+  const newScreenings = (await db.list("screenings", { eq: { status: "new" } })).length;
 
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[15rem_1fr]">
@@ -26,7 +27,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
             Ver site
           </Link>
         </div>
-        <AdminNav />
+        <AdminNav newScreenings={newScreenings} />
         <form action={signOut} className="hidden lg:absolute lg:bottom-6 lg:left-4 lg:right-4 lg:block">
           <p className="t-small mb-2 truncate">{user.email}</p>
           <button type="submit" className="link-draw min-h-9 text-[0.9rem]">

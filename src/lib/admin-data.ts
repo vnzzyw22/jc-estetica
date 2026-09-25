@@ -34,6 +34,8 @@ async function assertNotBlocked(db: Db, startISO: string, endISO: string): Promi
 
 interface ManualAppointment {
   clientId?: string | null;
+  /** Liga a avaliação à triagem (o banco move o estado do lead). */
+  screeningId?: string | null;
   name?: string;
   phone?: string;
   email?: string | null;
@@ -71,6 +73,7 @@ export async function createManualAppointment(db: Db, input: ManualAppointment):
   const created = await db.insert("appointments", {
     client_id: clientId,
     service_id: service?.id ?? null,
+    screening_id: input.screeningId ?? null,
     kind,
     starts_at: startISO,
     ends_at: endISO,

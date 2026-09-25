@@ -1,3 +1,4 @@
+import { OriginCapture } from "@/components/screening/origin-capture";
 import { Footer } from "@/components/site/footer";
 import { Nav } from "@/components/site/nav";
 import { Ruler } from "@/components/site/ruler";
@@ -26,6 +27,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <a href="#conteudo" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:bg-espresso focus:px-4 focus:py-2 focus:text-porcelana">
         Pular para o conteúdo
       </a>
+      <OriginCapture />
       <Ruler />
       <Nav name={settings.business_name} />
       <main id="conteudo">{children}</main>

@@ -19,6 +19,8 @@ export interface Settings {
   buffer_minutes: number;
   auto_confirm: boolean;
   evaluation_duration_minutes: number;
+  /** Produção: true. Sem termo de consentimento ATIVO a triagem não coleta dados. */
+  screening_requires_consent_term: boolean;
   timezone: string;
 }
 
@@ -138,6 +140,7 @@ export interface ConsentTerm {
   body: string;
   active: boolean;
   published_at: string | null;
+  created_at: string;
 }
 
 /** Triagem = lead. Nome, telefone e e-mail vivem só em clients (fonte central). */

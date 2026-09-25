@@ -42,7 +42,7 @@ export function Nav({ name }: { name: string }) {
       }`}
     >
       <div className="wrap flex h-[var(--nav-h)] items-center justify-between gap-6">
-        <Link href="/" className="font-serif text-[1.35rem] font-light leading-none tracking-[-0.02em] lg:text-[1.5rem]" aria-label={`${name} — início`}>
+        <Link href="/" className="whitespace-nowrap font-serif text-[1.35rem] font-light leading-none tracking-[-0.02em] lg:text-[1.5rem]" aria-label={`${name} — início`}>
           {name}
         </Link>
 
@@ -63,8 +63,9 @@ export function Nav({ name }: { name: string }) {
         </nav>
 
         <div className="flex items-center gap-4 lg:hidden">
-          <Link href="/triagem" className="link-draw text-[0.95rem] font-medium">
-            Meu tratamento
+          <Link href="/triagem" className="link-draw whitespace-nowrap text-[0.95rem] font-medium">
+            <span className="min-[400px]:hidden">Triagem</span>
+            <span className="hidden min-[400px]:inline">Meu tratamento</span>
           </Link>
           <button
             ref={openRef}

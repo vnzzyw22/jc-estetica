@@ -83,6 +83,11 @@ body {
   border-radius: var(--radius-ctl);
 }
 
+/* Títulos recebem foco só por código (troca de passo, confirmação): o anel não faz sentido ali. */
+[tabindex="-1"]:focus-visible {
+  outline: none;
+}
+
 .on-dark :focus-visible {
   outline-color: var(--color-porcelana);
 }

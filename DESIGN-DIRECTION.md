@@ -206,3 +206,11 @@ O site passa a conduzir para **descobrir o tratamento**, e não para escolher um
 - **Só o que é conhecido:** duração provisória (60 min, exigida pelo sistema para calcular horários) **não aparece**; só a duração marcada como confirmada no painel. Valor vazio não mostra "sob avaliação" repetido. Sem descrição, a linha fica só com o nome. Nenhum "R$ 0,00".
 - **Página do tratamento:** título e ações alinhados às bordas da foto (título no topo, CTAs na base), para o vazio ser composição e não sobra de conteúdo ausente.
 - **/triagem** é provisória até a Etapa 3: explica que a triagem está sendo preparada e oferece agendar ou conversar no WhatsApp.
+
+## 14. Etapa 3: a triagem (mobile primeiro)
+
+- **Um assunto por tela.** Pergunta em serifada grande, opções como linhas com fio fino (nunca cartões), controle de escolha única em círculo e o consentimento em caixa de marcar: a forma diz o que o controle faz.
+- **Progresso discreto:** cinco traços finos (eco da régua) e "Passo 2 de 5". Sem barra chamativa, sem porcentagem.
+- **Ações:** barra fixa na base no celular (Voltar / Continuar) e inline no desktop, alinhada à coluna do formulário. Enter avança; setas trocam a opção; o foco vai ao título a cada passo.
+- **Resumo antes de enviar,** com "Alterar" por linha, e confirmação em tela própria.
+- **Linguagem:** sem jargão médico. Perguntas de saúde detalhadas ficam fora; há um campo opcional dizendo que isso é conversado na avaliação.
