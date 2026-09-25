@@ -28,7 +28,7 @@ export async function saveClientAction(_prev: ActionState, fd: FormData): Promis
 
 export async function deleteClientAction(fd: FormData): Promise<void> {
   const result = await guarded((db) => db.remove("clients", str(fd, "id")), PATHS);
-  // Cliente com histórico não pode ser excluído (o banco protege); volta ao detalhe.
-  if (result?.error) redirect(`/admin/clientes/${str(fd, "id")}?erro=historico`);
+  // Cliente com histórico não pode ser excluído (o banco protege); volta à ficha com o motivo.
+  if (result?.error) redirect(`/admin/clientes/${str(fd, "id")}?erro=${encodeURIComponent("Esta cliente tem agendamentos, triagens, anamneses ou tratamentos e não pode ser excluída.")}`);
   redirect("/admin/clientes");
 }

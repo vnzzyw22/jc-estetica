@@ -8,11 +8,11 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test:sql": "node --test --test-concurrency=1 tests/sql/foundation.test.mjs tests/sql/screening.test.mjs tests/sql/demo.test.mjs",
+    "test:sql": "node --test --test-concurrency=1 tests/sql/foundation.test.mjs tests/sql/screening.test.mjs tests/sql/anamnese.test.mjs tests/sql/demo.test.mjs",
     "demo:load": "node scripts/local-db.mjs demo-load",
     "demo:clear": "node scripts/local-db.mjs demo-clear",
     "db:reset": "node scripts/local-db.mjs reset",
-    "test:unit": "node --test tests/unit/screening.test.mjs",
+    "test:unit": "node --test tests/unit/screening.test.mjs tests/unit/ficha.test.mjs",
     "test": "npm run test:unit && npm run test:sql",
     "db:bundle": "node scripts/bundle-sql.mjs"
   },

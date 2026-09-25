@@ -175,6 +175,7 @@ export interface Anamnesis {
   additional_info: string | null;
   professional_notes: string | null;
   data: Record<string, unknown>;
+  completed_at: string | null;
   created_at: string;
 }
 

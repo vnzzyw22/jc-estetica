@@ -31,10 +31,11 @@ Só quatro. **Nenhuma é secreta e nenhuma chave privada (`service_role`) é usa
 2. `supabase/migrations/20260925120000_fundacao_clinica.sql` — triagem, anamnese, pacotes, tratamentos, sessões, evolução, pagamentos, despesas, profissionais, consentimento.
 3. `supabase/migrations/20260925130000_servicos_exibicao.sql` — `services.duration_confirmed` (o site só exibe duração confirmada).
 4. `supabase/migrations/20260925140000_triagem_publica.sql` — trava do termo (`settings.screening_requires_consent_term`, **padrão ligado**), `submit_screening` v2 e gatilhos que ligam avaliação à triagem.
-5. `supabase/seed.sql` — **produção**: configurações, horários padrão, 12 serviços reais, categorias de despesa, placeholders de conteúdo. Nenhum cliente, triagem ou valor.
-6. Criar o usuário no Auth e `insert into admin_profiles (user_id) values ('<uuid>')`.
+5. `supabase/migrations/20260926100000_anamnese.sql` — integridade da anamnese (índice de um rascunho por cliente, conclusão exige data e conteúdo, `completed_at`, e concluir a anamnese marca a triagem como avaliada).
+6. `supabase/seed.sql` — **produção**: configurações, horários padrão, 12 serviços reais, categorias de despesa, placeholders de conteúdo. Nenhum cliente, triagem ou valor.
+7. Criar o usuário no Auth e `insert into admin_profiles (user_id) values ('<uuid>')`.
 
-Dados demonstrativos ficam em `supabase/demo/` e **nunca** entram no passo 5 (ver seção 6).
+Dados demonstrativos ficam em `supabase/demo/` e **nunca** entram no passo 6 (ver seção 6).
 
 ### O que a migração 2 muda no que já existe
 
@@ -120,6 +121,14 @@ select extname from pg_extension where extname = 'btree_gist';
 - **Anti-spam** (`src/lib/antispam.ts`): isca + tempo mínimo (4 s, guardado no rascunho), limite por IP em memória (12/h, melhor esforço), limite por telefone no banco (3/24 h) e Turnstile opcional. **Antes de divulgar o link: ativar o Turnstile** (ou um limitador compartilhado).
 - **Minimização:** a triagem não pergunta medicação, gestação nem histórico clínico; há um campo opcional avisando que isso é conversado na avaliação. O detalhe clínico é da anamnese (Etapa 4).
 
+### Anamnese (Etapa 4)
+
+- Dados de saúde: RLS só `is_admin()`; `created_by` registra quem criou. Anônimo e usuário sem perfil não leem nem escrevem (testado).
+- A **pré-anamnese é a própria triagem** (`anamneses.screening_id`); não há cópia dos dados da cliente.
+- Integridade no banco: um único rascunho por cliente; concluída exige `assessed_at` e conteúdo profissional; texto até 6000 caracteres por campo; `completed_at` automático.
+- **Sem diagnóstico:** o registro é de acompanhamento. Reavaliação cria uma nova anamnese e preserva a anterior.
+- **Ainda não há log de acesso/auditoria de leitura** dos dados de saúde (só `created_by`). Avaliar antes de operar com dados reais de clientes.
+
 ## 6. Ambientes e dados demonstrativos
 
 | Ambiente | Banco | Dados |
@@ -134,7 +143,7 @@ Comandos locais: `npm run demo:load`, `npm run demo:clear`, `npm run db:reset`. 
 
 ## 7. Testes
 
-`npm run test:sql` executa 59 testes em Postgres real (PGlite com as migrações verdadeiras e as permissões padrão do Supabase reproduzidas): RLS por papel (anônimo, autenticado sem perfil, admin), conflito de agenda, triagem, `create_booking`, fluxo pacote → sessões → agenda → financeiro, cobrança por sessão, `cash_flow` e o seed demo. Cobrem regras de banco; **não substituem** validar num Supabase real (seção 5).
+`npm run test:sql` executa 68 testes em Postgres real (PGlite com as migrações verdadeiras e as permissões padrão do Supabase reproduzidas): RLS por papel (anônimo, autenticado sem perfil, admin), conflito de agenda, triagem, `create_booking`, fluxo pacote → sessões → agenda → financeiro, cobrança por sessão, `cash_flow` e o seed demo. Cobrem regras de banco; **não substituem** validar num Supabase real (seção 5).
 
 ## 8. Riscos conhecidos
 

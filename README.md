@@ -46,7 +46,9 @@ Nenhuma chave secreta é usada no código. **Não use a `service_role` neste pro
    2. [supabase/migrations/20260925120000_fundacao_clinica.sql](supabase/migrations/20260925120000_fundacao_clinica.sql) (triagem, anamnese, tratamentos, sessões, evolução, financeiro; requer a extensão `btree_gist`)
    3. [supabase/migrations/20260925130000_servicos_exibicao.sql](supabase/migrations/20260925130000_servicos_exibicao.sql) (só exibe duração confirmada)
    4. [supabase/migrations/20260925140000_triagem_publica.sql](supabase/migrations/20260925140000_triagem_publica.sql) (trava do termo de consentimento e estado da triagem comandado pela agenda)
-   5. [supabase/seed.sql](supabase/seed.sql) (**produção**: configurações, horários padrão, os 12 serviços reais, categorias de despesa e placeholders de conteúdo; sem dados fictícios)
+   5. [supabase/migrations/20260926100000_anamnese.sql](supabase/migrations/20260926100000_anamnese.sql) (integridade da anamnese: um rascunho por cliente, conclusão exige data e conteúdo)
+   6. [supabase/seed.sql](supabase/seed.sql) (**produção**: configurações, horários padrão, os 12 serviços reais, categorias de despesa e placeholders de conteúdo; sem dados fictícios)
+   Atalho: `npm run db:bundle` gera **um único arquivo** (`supabase/setup-completo.sql`) com tudo isso, para um projeto vazio. Em um projeto que já tem as migrações anteriores, rode só a nova.
    (Ou, com a CLI: `supabase link` + `supabase db push`, depois rode o seed.)
 3. **Authentication → Users → Add user**: crie o login da Jennifer (e-mail + senha).
 4. Torne essa conta administradora. No SQL Editor, com o `id` do usuário criado:
@@ -73,7 +75,7 @@ Modelo completo, regras, checklist de segurança para rodar no Supabase e riscos
 
 ## Testes
 
-`npm test` roda os testes unitários da triagem (11) e os de SQL num Postgres real (59: RLS, conflito de agenda, triagem, pacote → sessões → financeiro). Antes de publicar: `npm run lint && npm run typecheck && npm test && npm run build`.
+`npm test` roda os testes unitários (25: triagem, etapa da cliente, anamnese) e os de SQL num Postgres real (68: RLS, conflito de agenda, triagem, anamnese, pacote → sessões → financeiro). Antes de publicar: `npm run lint && npm run typecheck && npm test && npm run build`.
 
 ## Triagem pública (`/triagem`)
 
@@ -83,9 +85,15 @@ Cinco passos curtos (queixa, objetivo, contexto, rotina, contato), resumo e conf
 - **Consentimento:** o texto oficial se cadastra em `/admin/consentimento`. **Em produção a triagem não recebe envios enquanto não houver um termo publicado** (o banco recusa). O ambiente local relaxa essa trava só para desenvolvimento.
 - **Anti-spam:** campo-isca, tempo mínimo de preenchimento, limite por IP (melhor esforço), limite por telefone no banco (3 em 24 h) e, opcionalmente, Turnstile. Antes de divulgar o link, ative o Turnstile.
 
+## Ficha da cliente e anamnese (`/admin/clientes/[id]`)
+
+- **Resumo:** próximo agendamento, último atendimento, triagem, anamnese, dados de contato e **linha do tempo** (cadastro, triagens, anamneses, agenda, tratamentos).
+- **Anamnese:** de um lado o que a cliente informou na triagem (pré-anamnese, somente leitura); do outro o registro profissional (avaliação, histórico, contraindicações, informações adicionais, observações). Tem rascunho, conclusão (fica somente leitura), reabertura e reavaliação (nova anamnese; a anterior fica no histórico). **Não há campo de diagnóstico.** Concluir a anamnese de uma triagem move a triagem para "Avaliada".
+- **Etapa (calculada, nada gravado):** *Lead* enviou triagem e ainda não foi atendida; *Cliente* já foi atendida ou tem agendamento de serviço; *Em tratamento* tem tratamento ativo ou pausado. Tratamentos, sessões, evolução e financeiro entram na ficha nas Etapas 5 e 6.
+
 ## Painel (`/admin`)
 
-Dashboard, **Triagens** (lista com filtros, detalhe, estado, observações internas e agendamento de avaliação), Agenda (dia, semana, mês), Agendamentos (criar, confirmar, concluir, cancelar, remarcar, excluir), Clientes (histórico e observações), Serviços, Horários, Bloqueios, Galeria (upload), Conteúdo (textos e fotos do site), FAQ, Consentimento (texto oficial da triagem) e Configurações (WhatsApp, Instagram, endereço, regras de agendamento).
+Dashboard, **Triagens** (lista com filtros, detalhe, estado, observações internas e agendamento de avaliação), Agenda (dia, semana, mês), Agendamentos (criar, confirmar, concluir, cancelar, remarcar, excluir), Clientes (**ficha** com Resumo e linha do tempo, Triagem, Anamnese e Agenda; etapa Lead, Cliente ou Em tratamento calculada), Serviços, Horários, Bloqueios, Galeria (upload), Conteúdo (textos e fotos do site), FAQ, Consentimento (texto oficial da triagem) e Configurações (WhatsApp, Instagram, endereço, regras de agendamento).
 
 ## Conteúdo que ainda precisa ser informado
 

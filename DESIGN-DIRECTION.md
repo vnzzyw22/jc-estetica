@@ -214,3 +214,10 @@ O site passa a conduzir para **descobrir o tratamento**, e não para escolher um
 - **Ações:** barra fixa na base no celular (Voltar / Continuar) e inline no desktop, alinhada à coluna do formulário. Enter avança; setas trocam a opção; o foco vai ao título a cada passo.
 - **Resumo antes de enviar,** com "Alterar" por linha, e confirmação em tela própria.
 - **Linguagem:** sem jargão médico. Perguntas de saúde detalhadas ficam fora; há um campo opcional dizendo que isso é conversado na avaliação.
+
+## 15. Etapa 4: a ficha da cliente
+
+- **Uma pessoa, um lugar.** Cabeçalho com nome grande, etapa (Lead, Cliente, Em tratamento), contato e "cliente desde"; abaixo, abas em texto simples com sublinhado (sem botões pill): Resumo, Triagem, Anamnese, Agenda.
+- **Linha do tempo vertical** (mesma linguagem da seção "Como começa" do site): a história da cliente do mais recente ao mais antigo, com ponto verde para o que ainda vai acontecer.
+- **Anamnese em duas colunas:** à esquerda o que a cliente disse (somente leitura, tom neutro); à direita o registro profissional, que é onde a Jennifer escreve. O aviso "não é diagnóstico médico" fica junto do botão de concluir.
+- **Mobile:** as quatro abas cabem em 360 px (o rótulo "rascunho" vira um ponto). Colunas viram pilha.
