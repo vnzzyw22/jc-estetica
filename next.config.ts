@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
     return [
       { source: "/servicos", destination: "/tratamentos", permanent: true },
       { source: "/servicos/:slug", destination: "/tratamentos/:slug", permanent: true },
+      // Atalhos para quem digita o endereço do painel de cabeça.
+      { source: "/painel", destination: "/admin/login", permanent: false },
+      { source: "/login", destination: "/admin/login", permanent: false },
+      { source: "/agendamento/admin", destination: "/admin/login", permanent: false },
     ];
   },
   images: {
