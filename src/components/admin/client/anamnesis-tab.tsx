@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { reopenAnamnesisAction, startAnamnesisAction } from "@/app/admin/(painel)/clientes/[id]/actions";
+import { discardDraftAction, reopenAnamnesisAction, startAnamnesisAction } from "@/app/admin/(painel)/clientes/[id]/actions";
 import { AnamnesisForm } from "@/components/admin/anamnesis-form";
 import { ConfirmButton } from "@/components/admin/confirm-button";
 import { ScreeningData } from "@/components/admin/screening-data";
@@ -66,7 +66,16 @@ export function AnamnesisTab({ file, selectedId, today }: Props) {
             </p>
 
             {selected.status === "draft" ? (
-              <AnamnesisForm key={selected.id} anamnesis={selected} today={today} />
+              <>
+                <AnamnesisForm key={selected.id} anamnesis={selected} today={today} />
+                <form action={discardDraftAction} className="mt-6">
+                  <input type="hidden" name="client_id" value={client.id} />
+                  <input type="hidden" name="id" value={selected.id} />
+                  <ConfirmButton confirm="Descartar este rascunho? O que foi escrito nele será apagado." className="link-draw text-[0.9rem] text-alerta">
+                    Descartar rascunho
+                  </ConfirmButton>
+                </form>
+              </>
             ) : (
               <>
                 <dl className="border-t border-linha">

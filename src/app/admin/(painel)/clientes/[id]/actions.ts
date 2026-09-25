@@ -53,6 +53,23 @@ export async function saveAnamnesisAction(_prev: ActionState, fd: FormData): Pro
   }, PATHS);
 }
 
+/**
+ * Descarta um RASCUNHO (por exemplo, aberto por engano). Anamnese concluída é registro clínico e
+ * nunca é apagada por aqui: para corrigi-la, reabra ou faça uma reavaliação.
+ */
+export async function discardDraftAction(fd: FormData): Promise<void> {
+  const clientId = str(fd, "client_id");
+  const id = str(fd, "id");
+  const res = await guarded(async (db) => {
+    const current = await db.get("anamneses", id);
+    if (!current) return;
+    if (current.status !== "draft") throw new Error("somente rascunhos podem ser descartados");
+    await db.remove("anamneses", id);
+  }, PATHS);
+  if (res?.error) redirect(back(clientId, `&id=${id}&erro=${encodeURIComponent("Só é possível descartar rascunhos.")}`));
+  redirect(back(clientId));
+}
+
 export async function reopenAnamnesisAction(fd: FormData): Promise<void> {
   const clientId = str(fd, "client_id");
   const id = str(fd, "id");
