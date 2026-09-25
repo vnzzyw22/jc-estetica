@@ -13,7 +13,8 @@
     "demo:clear": "node scripts/local-db.mjs demo-clear",
     "db:reset": "node scripts/local-db.mjs reset",
     "test:unit": "node --test tests/unit/screening.test.mjs",
-    "test": "npm run test:unit && npm run test:sql"
+    "test": "npm run test:unit && npm run test:sql",
+    "db:bundle": "node scripts/bundle-sql.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",
