@@ -297,7 +297,13 @@ export interface CashFlowRow {
   source_id: string;
   client_id: string | null;
   treatment_id: string | null;
+  /** Entrada: tipo do recebimento (treatment/session/service/other). Saída: fixed | variable. */
   category: string;
+  description: string | null;
+  /** Só entradas. */
+  method: PaymentMethod | null;
+  /** Só saídas: nome da categoria de despesa. */
+  category_name: string | null;
 }
 
 /** Nome de tabela → tipo da linha. */

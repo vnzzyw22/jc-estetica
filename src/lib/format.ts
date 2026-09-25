@@ -3,6 +3,11 @@ export function formatPrice(price: number | null | undefined): string {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(price);
 }
 
+/** Valor em reais para o painel financeiro: sempre com centavos ("R$ 1.234,50"), nunca "sob avaliação". */
+export function formatMoney(value: number): string {
+  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Object.is(value, -0) ? 0 : value);
+}
+
 export function formatDuration(minutes: number): string {
   if (minutes < 60) return `${minutes} min`;
   const h = Math.floor(minutes / 60);
@@ -72,6 +77,33 @@ export const STATUS_LABEL: Record<string, string> = {
   completed: "Concluído",
   cancelled: "Cancelado",
 };
+
+export const PAYMENT_METHOD_LABEL: Record<string, string> = {
+  pix: "Pix",
+  cash: "Dinheiro",
+  debit: "Débito",
+  credit: "Crédito",
+  transfer: "Transferência",
+  other: "Outra",
+};
+
+/** Origem do recebimento (coluna `kind` de payments). */
+export const PAYMENT_KIND_LABEL: Record<string, string> = {
+  treatment: "Tratamento",
+  session: "Sessão avulsa",
+  service: "Atendimento",
+  other: "Avulso",
+};
+
+export const PAYMENT_VIEW_LABEL: Record<string, string> = {
+  paid: "Recebido",
+  pending: "A receber",
+  overdue: "Atrasado",
+  cancelled: "Cancelado",
+  refunded: "Estornado",
+};
+
+export const EXPENSE_KIND_LABEL: Record<string, string> = { fixed: "Fixa", variable: "Variável" };
 
 export const BLOCK_KIND_LABEL: Record<string, string> = {
   block: "Bloqueio",

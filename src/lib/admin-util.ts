@@ -15,6 +15,23 @@ const DB_MESSAGE: Record<string, string> = {
   invalid_name: "Informe o nome do cliente.",
   invalid_phone: "Informe um telefone válido com DDD.",
   upload_failed: "Não foi possível enviar a imagem. Use JPG, PNG ou WebP de até 5 MB.",
+  // Financeiro
+  invalid_amount: "Informe um valor maior que zero.",
+  invalid_installments: "O número de parcelas deve ficar entre 1 e 36.",
+  paid_needs_single: "Só é possível registrar como já recebido um pagamento em parcela única.",
+  paid_in_future: "A data do recebimento não pode estar no futuro.",
+  client_mismatch: "O tratamento ou atendimento escolhido é de outra cliente.",
+  client_not_found: "Cliente não encontrada.",
+  description_required: "Descreva o que está sendo cobrado.",
+  method_required: "Escolha a forma de pagamento para registrar o recebimento.",
+  invalid_status: "Esse recebimento não pode mudar para esse estado agora. Atualize a página.",
+  payment_not_found: "Recebimento não encontrado.",
+  treatment_not_found: "Tratamento não encontrado.",
+  appointment_not_found: "Atendimento não encontrado.",
+  no_price: "Este tratamento não tem valor definido.",
+  plan_exists: "Este tratamento já tem parcelas geradas.",
+  "22003": "O valor é grande demais.",
+  "23514": "Algum valor está fora do permitido. Confira os campos.",
 };
 
 /**
