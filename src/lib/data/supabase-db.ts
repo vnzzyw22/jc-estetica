@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { BusyRange, TableName, Tables } from "@/lib/types";
 import { bookingErrorFrom, DbError, PK_COLUMN, type BookingInput, type Db, type PrimaryKey, type Query } from "@/lib/data/db";
+import { fetchAllPages } from "@/lib/paging";
 
 function fail(error: { message: string; code?: string }): never {
   throw new DbError(error.code ?? "unknown", error.message);
@@ -12,15 +13,30 @@ export function createSupabaseDb(client: SupabaseClient): Db {
   return {
     async list<K extends TableName>(table: K, query: Query<Tables[K]> = {}) {
       // O builder do supabase-js é encadeado dinamicamente; tipagem solta só aqui.
-      let q = client.from(table as string).select("*");
-      for (const [col, val] of Object.entries(query.eq ?? {})) q = q.eq(col, val as never);
-      for (const [col, val] of Object.entries(query.gte ?? {})) q = q.gte(col, val as never);
-      for (const [col, val] of Object.entries(query.lt ?? {})) q = q.lt(col, val as never);
-      for (const [col, dir] of query.order ?? []) q = q.order(col, { ascending: dir === "asc" });
-      if (query.limit) q = q.limit(query.limit);
-      const { data, error } = await q;
-      if (error) fail(error);
-      return (data ?? []) as Tables[K][];
+      const build = () => {
+        let q = client.from(table as string).select("*");
+        for (const [col, val] of Object.entries(query.eq ?? {})) q = q.eq(col, val as never);
+        for (const [col, val] of Object.entries(query.gte ?? {})) q = q.gte(col, val as never);
+        for (const [col, val] of Object.entries(query.lt ?? {})) q = q.lt(col, val as never);
+        const orders = query.order ?? [];
+        for (const [col, dir] of orders) q = q.order(col, { ascending: dir === "asc" });
+        // Desempate estável: sem ele, linhas com o mesmo valor podem se repetir ou faltar entre páginas.
+        if (!orders.some(([col]) => col === pkColumn(table))) q = q.order(pkColumn(table), { ascending: true });
+        return q;
+      };
+
+      if (query.limit) {
+        const { data, error } = await build().limit(query.limit);
+        if (error) fail(error);
+        return (data ?? []) as Tables[K][];
+      }
+
+      // Sem limite pedido: traz TUDO, página a página (o Supabase corta em 1000 linhas sem avisar).
+      return fetchAllPages(async (from, to) => {
+        const { data, error } = await build().range(from, to);
+        if (error) fail(error);
+        return (data ?? []) as Tables[K][];
+      });
     },
 
     async get<K extends TableName>(table: K, pk: PrimaryKey) {

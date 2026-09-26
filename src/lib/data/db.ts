@@ -90,6 +90,7 @@ export function bookingErrorFrom(message: string, code?: string): BookingErrorCo
     "too_far",
     "outside_hours",
     "blocked",
+    "too_many",
   ];
   return known.find((k) => message.includes(k)) ?? "unknown";
 }

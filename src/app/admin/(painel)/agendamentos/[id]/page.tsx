@@ -5,6 +5,7 @@ import { AdminForm } from "@/components/admin/admin-form";
 import { AppointmentActions } from "@/components/admin/appointment-actions";
 import { Field, PageTitle, StatusBadge } from "@/components/admin/ui";
 import { PaymentChip } from "@/components/admin/finance/finance-chip";
+import { Notice } from "@/components/admin/finance/notice";
 import { requireAdmin } from "@/lib/auth";
 import { dateISOFromEpoch, dayLabel, timeLabel, todayISO } from "@/lib/date";
 import { paymentView } from "@/lib/finance";
@@ -13,9 +14,10 @@ import { whatsappLink } from "@/lib/whatsapp";
 
 export const metadata = { title: "Agendamento" };
 
-export default async function AppointmentDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function AppointmentDetailPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ erro?: string }> }) {
   const { db } = await requireAdmin();
   const { id } = await params;
+  const sp = await searchParams;
   const appt = await db.get("appointments", id);
   if (!appt) notFound();
 
@@ -37,6 +39,8 @@ export default async function AppointmentDetailPage({ params }: { params: Promis
           Voltar à lista
         </Link>
       </PageTitle>
+
+      <Notice erro={sp.erro} />
 
       <div className="grid gap-x-12 gap-y-10 xl:grid-cols-2">
         <section aria-labelledby="dados">

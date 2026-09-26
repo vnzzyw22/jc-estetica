@@ -188,9 +188,9 @@ export function BookingFlow({ services, today, maxDate, initialServiceId }: Book
     const complete = n < step && summary;
     return (
       <div className="flex items-baseline gap-4">
-        <span className={`tnum w-6 text-[0.9rem] ${reached ? "text-bisturi" : "text-cafe/40"}`}>{n}</span>
+        <span className={`tnum w-6 text-[0.9rem] ${reached ? "text-bisturi" : "text-cafe"}`}>{n}</span>
         <div className="min-w-0 flex-1">
-          <h2 className={`t-h3 ${reached ? "" : "text-cafe/40"}`}>{STEP_TITLES[n]}</h2>
+          <h2 className={`t-h3 ${reached ? "" : "text-cafe/70"}`}>{STEP_TITLES[n]}</h2>
           {complete && <p className="tnum mt-1 truncate text-[0.9rem] text-cafe">{summary}</p>}
         </div>
         {complete && (

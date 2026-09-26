@@ -1,6 +1,7 @@
 "use server";
 
 import { createManualAppointment } from "@/lib/admin-data";
+import { DbError } from "@/lib/data/db";
 import { guarded, optStr, str, type ActionState } from "@/lib/admin-util";
 import { isValidDateISO } from "@/lib/date";
 import { SCREENING_STATUS } from "@/lib/screening";
@@ -28,7 +29,7 @@ export async function scheduleEvaluationAction(_prev: ActionState, fd: FormData)
 
   return guarded(async (db) => {
     const screening = await db.get("screenings", str(fd, "id"));
-    if (!screening) throw new Error("triagem não encontrada");
+    if (!screening) throw new DbError("not_found", "Triagem não encontrada.");
     await createManualAppointment(db, {
       clientId: screening.client_id,
       screeningId: screening.id,

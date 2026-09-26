@@ -1,8 +1,8 @@
 "use server";
 
-import { headers } from "next/headers";
 import { getPublicDb } from "@/lib/data";
 import { DbError } from "@/lib/data/db";
+import { clientIp } from "@/lib/client-ip";
 import { isHoneypotTripped, isIpRateLimited, isTooFast, verifyTurnstile } from "@/lib/antispam";
 import { FIELD_STEP, normalizeCampaign, normalizeSource, validateScreening, type FieldErrors, type ScreeningInput } from "@/lib/screening";
 
@@ -32,12 +32,6 @@ const MESSAGE: Record<string, string> = {
 };
 
 const GENERIC = "Não foi possível enviar agora. Tente de novo em instantes ou fale pelo WhatsApp.";
-
-async function clientIp(): Promise<string | null> {
-  const h = await headers();
-  const forwarded = h.get("x-forwarded-for");
-  return (forwarded ? forwarded.split(",")[0].trim() : h.get("x-real-ip")) || null;
-}
 
 export async function submitScreening(input: SubmitScreeningInput): Promise<SubmitScreeningResult> {
   // 1) Anti-spam. O campo-isca preenchido finge sucesso: não ensinamos o bot.

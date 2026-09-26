@@ -20,6 +20,8 @@ function Fact({ label, children }: { label: string; children: React.ReactNode })
 }
 
 export function AboutBlock({ name, content, full = false }: AboutBlockProps) {
+  // Na página /sobre este é o título da página (h1); na home é uma seção (h2).
+  const Title = full ? "h1" : "h2";
   return (
     <section data-section="Profissional" className="wrap py-[var(--spacing-section)]">
       <div className="grid items-start gap-y-12 lg:grid-cols-12 lg:gap-x-6">
@@ -29,7 +31,7 @@ export function AboutBlock({ name, content, full = false }: AboutBlockProps) {
 
         <div className="lg:col-span-6 lg:col-start-7 lg:pt-16">
           <Reveal>
-            <h2 className="t-h1">{name}</h2>
+            <Title className="t-h1">{name}</Title>
             <p className="t-lead mt-6 max-w-[34ch] text-cafe">{content["about.role"]}</p>
           </Reveal>
 

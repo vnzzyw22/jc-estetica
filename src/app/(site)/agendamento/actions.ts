@@ -6,6 +6,8 @@ import { DbError } from "@/lib/data/db";
 import { getAvailability, getSettings, getServices } from "@/lib/queries";
 import { availableDays, nextFreeSlot, slotsForDay } from "@/lib/scheduling";
 import { addDaysISO, dateISOFromEpoch, dayLabel, isValidDateISO, isoAt, monthBounds, todayISO } from "@/lib/date";
+import { isIpRateLimited } from "@/lib/antispam";
+import { clientIp } from "@/lib/client-ip";
 import { digitsOnly } from "@/lib/format";
 import { whatsappLink } from "@/lib/whatsapp";
 import type { BookingErrorCode, Service } from "@/lib/types";
@@ -20,6 +22,7 @@ const ERROR_MESSAGE: Record<BookingErrorCode, string> = {
   outside_hours: "Esse horário está fora do atendimento. Escolha outro.",
   blocked: "Esse horário ficou indisponível. Escolha outro.",
   conflict: "Esse horário acabou de ser reservado por outra pessoa. Escolha outro.",
+  too_many: "Você já tem horários reservados por aqui. Para marcar mais, fale com a Jennifer pelo WhatsApp.",
   unknown: "Não foi possível concluir o agendamento. Tente novamente ou chame no WhatsApp.",
 };
 
@@ -87,10 +90,14 @@ export async function createBooking(input: CreateBookingInput): Promise<CreateBo
   const phone = digitsOnly(input.phone);
   const email = input.email?.trim() ?? "";
 
-  if (name.length < 2) return { ok: false, error: ERROR_MESSAGE.invalid_name, field: "name" };
+  if (name.length < 2 || name.length > 120) return { ok: false, error: ERROR_MESSAGE.invalid_name, field: "name" };
   if (phone.length < 10 || phone.length > 11) return { ok: false, error: ERROR_MESSAGE.invalid_phone, field: "phone" };
-  if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { ok: false, error: "Esse e-mail não parece válido.", field: "email" };
+  if (email && (email.length > 200 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))) return { ok: false, error: "Esse e-mail não parece válido.", field: "email" };
   if (!isValidDateISO(input.dateISO) || !/^\d{2}:\d{2}$/.test(input.time)) return { ok: false, error: "Escolha data e horário." };
+
+  // Freio por IP (melhor esforço; o limite firme por telefone está no banco). Erros de digitação acima não gastam a cota.
+  const ip = await clientIp();
+  if (ip && isIpRateLimited(`booking:${ip}`)) return { ok: false, error: ERROR_MESSAGE.too_many };
 
   const service = await findService(input.serviceId);
   if (!service) return { ok: false, error: ERROR_MESSAGE.service_not_found };
@@ -108,7 +115,7 @@ export async function createBooking(input: CreateBookingInput): Promise<CreateBo
       name,
       phone,
       email: email || undefined,
-      notes: input.notes?.trim() || undefined,
+      notes: input.notes?.trim().slice(0, 1000) || undefined,
     });
   } catch (err) {
     if (err instanceof DbError && err.code === "not_configured") {

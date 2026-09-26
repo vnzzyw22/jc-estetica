@@ -17,7 +17,7 @@ export default async function TreatmentsPage() {
     <>
       <PageHeader title="Tratamentos" section="Tratamentos" lead="Três frentes de cuidado. Se ficar em dúvida por onde começar, faça a triagem." />
       <section className="wrap pb-[var(--spacing-section)]">
-        <Procedures services={services} />
+        <Procedures services={services} level={2} />
       </section>
     </>
   );

@@ -6,7 +6,7 @@ A direção de arte está em [DESIGN-DIRECTION.md](DESIGN-DIRECTION.md). Ela é 
 
 ## Requisitos
 
-- Node.js 20 ou superior
+- Node.js 22.18 ou superior (os testes unitários importam arquivos `.ts` direto; o app em si roda em versões anteriores)
 - Conta no [Supabase](https://supabase.com) (produção) e na [Vercel](https://vercel.com) (deploy)
 
 ## Instalação e desenvolvimento local
@@ -49,7 +49,8 @@ Nenhuma chave secreta é usada no código. **Não use a `service_role` neste pro
    5. [supabase/migrations/20260926100000_anamnese.sql](supabase/migrations/20260926100000_anamnese.sql) (integridade da anamnese: um rascunho por cliente, conclusão exige data e conteúdo)
    6. [supabase/migrations/20260927100000_financeiro.sql](supabase/migrations/20260927100000_financeiro.sql) (financeiro: `create_receivable`, `change_payment_status`, `generate_recurring_expenses` e o caixa `cash_flow` com descrição, forma e categoria)
    7. [supabase/migrations/20260928100000_tratamentos_acoes.sql](supabase/migrations/20260928100000_tratamentos_acoes.sql) (tratamentos: `cancel_treatment`, `pause_treatment` e `save_package_services`; sem tabela nova)
-   8. [supabase/seed.sql](supabase/seed.sql) (**produção**: configurações, horários padrão, os 12 serviços reais, categorias de despesa e placeholders de conteúdo; sem dados fictícios)
+   8. [supabase/migrations/20260929100000_endurecimento.sql](supabase/migrations/20260929100000_endurecimento.sql) (limite de 3 reservas futuras pelo site por telefone; troca atômica do termo de consentimento)
+   9. [supabase/seed.sql](supabase/seed.sql) (**produção**: configurações, horários padrão, os 12 serviços reais, categorias de despesa e placeholders de conteúdo; sem dados fictícios)
    Atalho: `npm run db:bundle` gera **um único arquivo** (`supabase/setup-completo.sql`) com tudo isso, para um projeto vazio. Em um projeto que já tem as migrações anteriores, rode só a nova.
    (Ou, com a CLI: `supabase link` + `supabase db push`, depois rode o seed.)
 3. **Authentication → Users → Add user**: crie o login da Jennifer (e-mail + senha).
@@ -67,6 +68,7 @@ Nenhuma chave secreta é usada no código. **Não use a `service_role` neste pro
 - O público **não escreve** nas tabelas. O único caminho é a função `create_booking`, que revalida serviço ativo, antecedência, expediente, pausa e bloqueios, e faz upsert do cliente por telefone.
 - O site calcula horários livres a partir da view `busy_slots`, que expõe só intervalos, sem nome nem telefone.
 - Administração exige `is_admin()` em todas as tabelas; leitura pública só do que é conteúdo do site.
+- **Freio de reservas:** `create_booking` recusa a 4ª reserva futura feita pelo site com o mesmo telefone (`too_many`); agendamentos criados no painel e os cancelados não contam. Há também um limite por IP no servidor (melhor esforço) e tamanho máximo para nome, e-mail e observações.
 
 ### Tabelas
 
@@ -77,7 +79,7 @@ Modelo completo, regras, checklist de segurança para rodar no Supabase e riscos
 
 ## Testes
 
-`npm test` roda os testes unitários (79: triagem, etapa da cliente, anamnese, regras do financeiro, de tratamentos e do dashboard) e os de SQL num Postgres real (104: RLS, conflito de agenda, triagem, anamnese, pacote → sessões → financeiro, recebimentos, recorrentes, cancelar e pausar tratamento). Os unitários importam arquivos `.ts` direto, o que exige Node 22.18 ou superior. Antes de publicar: `npm run lint && npm run typecheck && npm test && npm run build`.
+`npm test` roda os testes unitários (86: triagem, etapa da cliente, anamnese, regras do financeiro, de tratamentos, do dashboard e da paginação) e os de SQL num Postgres real (116: RLS, conflito de agenda, triagem, anamnese, pacote → sessões → financeiro, recebimentos, recorrentes, cancelar e pausar tratamento, freio de reservas, termo de consentimento). Os unitários importam arquivos `.ts` direto, o que exige Node 22.18 ou superior. Antes de publicar: `npm run lint && npm run typecheck && npm test && npm run build`.
 
 ## Triagem pública (`/triagem`)
 

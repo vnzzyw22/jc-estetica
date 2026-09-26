@@ -52,6 +52,9 @@ export default async function SettingsPage() {
           <Field label="Folga entre atendimentos (min)">
             <input name="buffer_minutes" type="number" min={0} step={5} defaultValue={s.buffer_minutes} className="field" />
           </Field>
+          <Field label="Duração da avaliação (min)" hint="Vale para avaliações e retornos marcados sem um serviço.">
+            <input name="evaluation_duration_minutes" type="number" min={5} max={480} step={5} defaultValue={s.evaluation_duration_minutes} className="field" />
+          </Field>
           <label className="flex items-start gap-3 sm:col-span-2">
             <input type="checkbox" name="auto_confirm" defaultChecked={s.auto_confirm} className="mt-1 h-5 w-5 accent-[var(--color-bisturi)]" />
             <span>

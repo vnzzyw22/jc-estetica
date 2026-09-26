@@ -20,5 +20,6 @@ console.log("anon → schedule_session:", await anonFn("schedule_session('000000
 console.log("anon → cancel_treatment:", await anonFn("cancel_treatment('00000000-0000-0000-0000-000000000000')"));
 console.log("anon → pause_treatment:", await anonFn("pause_treatment('00000000-0000-0000-0000-000000000000')"));
 console.log("anon → save_package_services:", await anonFn("save_package_services('00000000-0000-0000-0000-000000000000', '{}'::uuid[])"));
+console.log("anon → activate_consent_term:", await anonFn("activate_consent_term('00000000-0000-0000-0000-000000000000')"));
 console.log("anon lê screenings:", (await q("select count(*)::int n from screenings"))[0].n, "linhas");
 await db.exec("reset role");

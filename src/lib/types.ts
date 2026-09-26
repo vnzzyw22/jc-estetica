@@ -345,4 +345,5 @@ export type BookingErrorCode =
   | "outside_hours"
   | "blocked"
   | "conflict"
+  | "too_many"
   | "unknown";

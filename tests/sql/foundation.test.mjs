@@ -230,6 +230,9 @@ describe("create_booking v2", () => {
   });
 
   test("não sobrescreve o nome de cliente existente", async () => {
+    // As consultas desta cliente foram inseridas direto na tabela (a coluna source tem padrão 'site'), então contariam na
+    // cota de 3 reservas futuras pelo site por telefone. Em produção, o que nasce no painel usa source = 'admin'.
+    await db.query("update appointments set source = 'admin' where client_id = $1", [clientId]);
     await book({ name: "Outro Nome", phone: "00900000001", start: futureSlot(9, 0, 26) });
     assert.equal((await db.query("select name from clients where phone = '00900000001'")).rows[0].name, "Cliente Teste");
   });

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AppointmentActions } from "@/components/admin/appointment-actions";
+import { Notice } from "@/components/admin/finance/notice";
 import { NewAppointmentForm } from "@/components/admin/new-appointment-form";
 import { Empty, PageTitle, StatusBadge } from "@/components/admin/ui";
 import { listAppointmentDetails } from "@/lib/admin-data";
@@ -10,7 +11,7 @@ import type { AppointmentStatus } from "@/lib/types";
 
 export const metadata = { title: "Agendamentos" };
 
-type Search = Promise<{ status?: string; from?: string; to?: string; novo?: string; data?: string }>;
+type Search = Promise<{ status?: string; from?: string; to?: string; novo?: string; data?: string; erro?: string }>;
 
 export default async function AppointmentsPage({ searchParams }: { searchParams: Search }) {
   const { db } = await requireAdmin();
@@ -30,6 +31,7 @@ export default async function AppointmentsPage({ searchParams }: { searchParams:
   return (
     <>
       <PageTitle title="Agendamentos" />
+      <Notice erro={sp.erro} />
 
       <details className="mb-10 border border-linha px-5 py-4" open={sp.novo === "1"}>
         <summary className="cursor-pointer font-medium">Novo agendamento manual</summary>

@@ -23,6 +23,7 @@ Só quatro. **Nenhuma é secreta e nenhuma chave privada (`service_role`) é usa
 - **Admin:** existir uma linha em `admin_profiles` com o `id` do usuário. Ter conta no Auth não dá acesso.
 - **Storage:** bucket público `media` (criado pela migração 1) para fotos do site/galeria. Fotos de **evolução** (futuro) devem ir para um bucket **privado** separado; a coluna `evolutions.photos` já existe.
 - **RPCs chamadas pelo app:** `create_booking` (pública) e, a partir da Etapa 3, `submit_screening` (pública) e as administrativas (`activate_treatment`, `schedule_session`…).
+- **Listagens completas:** o Supabase corta respostas em 1000 linhas sem avisar; `src/lib/data/supabase-db.ts` busca em páginas (`src/lib/paging.ts`) sempre que não há `limit`.
 - **Sem** Realtime, Edge Functions, Webhooks ou `service_role`.
 
 ## 3. Alterações de banco (ordem obrigatória)
@@ -34,10 +35,11 @@ Só quatro. **Nenhuma é secreta e nenhuma chave privada (`service_role`) é usa
 5. `supabase/migrations/20260926100000_anamnese.sql` — integridade da anamnese (índice de um rascunho por cliente, conclusão exige data e conteúdo, `completed_at`, e concluir a anamnese marca a triagem como avaliada).
 6. `supabase/migrations/20260927100000_financeiro.sql` — financeiro: `create_receivable` (à vista ou parcelado), `change_payment_status` (pendente → pago | cancelado, e de volta), `generate_recurring_expenses` (idempotente) e `cash_flow` com descrição, forma e categoria (colunas novas no fim). Sem tabela nova; a RLS é a existente. **Em um projeto que já tem as migrações 1 a 5, rode esta e a seguinte, nessa ordem.**
 7. `supabase/migrations/20260928100000_tratamentos_acoes.sql` — tratamentos: `cancel_treatment`, `pause_treatment` e `save_package_services`. Sem tabela nova; a RLS é a existente.
-8. `supabase/seed.sql` — **produção**: configurações, horários padrão, 12 serviços reais, categorias de despesa, placeholders de conteúdo. Nenhum cliente, triagem ou valor.
-9. Criar o usuário no Auth e `insert into admin_profiles (user_id) values ('<uuid>')`.
+8. `supabase/migrations/20260929100000_endurecimento.sql` — `create_booking` v3 (no máximo 3 reservas futuras pelo site por telefone; corta nome, e-mail e observações no tamanho máximo) e `activate_consent_term` (troca atômica do termo em vigor). Sem tabela nova.
+9. `supabase/seed.sql` — **produção**: configurações, horários padrão, 12 serviços reais, categorias de despesa, placeholders de conteúdo. Nenhum cliente, triagem ou valor.
+10. Criar o usuário no Auth e `insert into admin_profiles (user_id) values ('<uuid>')`.
 
-Dados demonstrativos ficam em `supabase/demo/` e **nunca** entram no passo 8 (ver seção 6).
+Dados demonstrativos ficam em `supabase/demo/` e **nunca** entram no passo 9 (ver seção 6).
 
 ### O que a migração 2 muda no que já existe
 
@@ -74,7 +76,8 @@ professionals ── appointments / treatments / anamneses / blocked_slots
 
 | Função | O que garante |
 |---|---|
-| `create_booking` | serviço ativo, antecedência, expediente, pausa, bloqueios; conflito pelo `EXCLUDE` |
+| `create_booking` | serviço ativo, antecedência, expediente, pausa, bloqueios; conflito pelo `EXCLUDE`; no máx. 3 reservas futuras pelo site por telefone |
+| `activate_consent_term` | troca o termo de consentimento em vigor numa transação só (nunca fica sem termo) |
 | `submit_screening` | consentimento obrigatório, validações, no máx. 3 por telefone/24 h, não sobrescreve cliente existente |
 | `create_treatment_from_package` | copia o pacote para um tratamento **proposto** |
 | `cancel_treatment` | cancela o tratamento e as sessões em aberto, libera os horários na agenda; sessões realizadas e cobranças ficam |
@@ -148,7 +151,7 @@ Comandos locais: `npm run demo:load`, `npm run demo:clear`, `npm run db:reset`. 
 
 ## 7. Testes
 
-`npm run test:sql` executa 104 testes em Postgres real (PGlite com as migrações verdadeiras e as permissões padrão do Supabase reproduzidas): RLS por papel (anônimo, autenticado sem perfil, admin), conflito de agenda, triagem, `create_booking`, fluxo pacote → sessões → agenda → financeiro, cobrança por sessão, `cash_flow` e o seed demo. Cobrem regras de banco; **não substituem** validar num Supabase real (seção 5).
+`npm run test:sql` executa 116 testes em Postgres real (PGlite com as migrações verdadeiras e as permissões padrão do Supabase reproduzidas): RLS por papel (anônimo, autenticado sem perfil, admin), conflito de agenda, triagem, `create_booking`, fluxo pacote → sessões → agenda → financeiro, cobrança por sessão, `cash_flow` e o seed demo. Cobrem regras de banco; **não substituem** validar num Supabase real (seção 5).
 
 ## 8. Riscos conhecidos
 

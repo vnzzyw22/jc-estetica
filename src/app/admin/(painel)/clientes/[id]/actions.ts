@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { guarded, optStr, str, type ActionState } from "@/lib/admin-util";
 import { validateAnamnesis, type AnamnesisIntent } from "@/lib/anamnesis";
+import { DbError } from "@/lib/data/db";
 import { todayISO } from "@/lib/date";
 
 const PATHS = ["/admin/clientes", "/admin/triagens", "/admin/dashboard"];
@@ -17,7 +18,7 @@ export async function startAnamnesisAction(fd: FormData): Promise<void> {
 
   const res = await guarded(async (db) => {
     const client = await db.get("clients", clientId);
-    if (!client) throw new Error("cliente não encontrada");
+    if (!client) throw new DbError("client_not_found");
     const created = await db.insert("anamneses", { client_id: clientId, screening_id: screeningId, status: "draft" });
     createdId = created.id;
   }, PATHS);
@@ -46,8 +47,8 @@ export async function saveAnamnesisAction(_prev: ActionState, fd: FormData): Pro
   return guarded(async (db) => {
     const id = str(fd, "id");
     const current = await db.get("anamneses", id);
-    if (!current) throw new Error("anamnese não encontrada");
-    if (current.status === "completed") throw new Error("anamnese já concluída: reabra para editar");
+    if (!current) throw new DbError("not_found", "Anamnese não encontrada.");
+    if (current.status === "completed") throw new DbError("invalid_state", "Esta anamnese já foi concluída. Reabra para editar.");
     await db.update("anamneses", id, { ...parsed.value, status: intent === "complete" ? "completed" : "draft" });
     return intent === "complete" ? "Anamnese concluída." : "Rascunho salvo.";
   }, PATHS);
@@ -63,7 +64,7 @@ export async function discardDraftAction(fd: FormData): Promise<void> {
   const res = await guarded(async (db) => {
     const current = await db.get("anamneses", id);
     if (!current) return;
-    if (current.status !== "draft") throw new Error("somente rascunhos podem ser descartados");
+    if (current.status !== "draft") throw new DbError("invalid_state", "Só é possível descartar rascunhos.");
     await db.remove("anamneses", id);
   }, PATHS);
   if (res?.error) redirect(back(clientId, `&id=${id}&erro=${encodeURIComponent("Só é possível descartar rascunhos.")}`));

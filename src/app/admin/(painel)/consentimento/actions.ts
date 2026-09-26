@@ -1,19 +1,14 @@
 "use server";
 
 import { bool, guarded, str, type ActionState } from "@/lib/admin-util";
-import type { Db } from "@/lib/data/db";
 
 const PATHS = ["/admin/consentimento", "/triagem"];
-
-/** Só um termo pode estar em vigor por vez (o banco também garante). */
-async function deactivateCurrent(db: Db): Promise<void> {
-  const current = await db.list("consent_terms", { eq: { kind: "screening", active: true } });
-  for (const t of current) await db.update("consent_terms", t.id, { active: false });
-}
 
 /**
  * Registra o texto OFICIAL do consentimento da triagem, fornecido pela Jennifer/responsável.
  * O sistema não escreve nem sugere texto jurídico.
+ * Publicar é atômico: o texto entra como rascunho e a função do banco troca o termo em vigor de uma vez.
+ * Se algo falhar no meio, o termo anterior continua valendo (a triagem nunca fica sem termo).
  */
 export async function saveTermAction(_prev: ActionState, fd: FormData): Promise<ActionState> {
   const version = str(fd, "version");
@@ -24,15 +19,14 @@ export async function saveTermAction(_prev: ActionState, fd: FormData): Promise<
   const publish = bool(fd, "publish");
 
   return guarded(async (db) => {
-    if (publish) await deactivateCurrent(db);
-    await db.insert("consent_terms", { kind: "screening", version, body, active: publish, published_at: publish ? new Date().toISOString() : null });
+    const created = await db.insert("consent_terms", { kind: "screening", version, body, active: false, published_at: null });
+    if (publish) await db.rpc("activate_consent_term", { p_term_id: created.id });
     return publish ? "Termo publicado. A triagem já usa esta versão." : "Rascunho salvo. Ele só vale depois de publicado.";
   }, PATHS);
 }
 
 export async function activateTermAction(fd: FormData): Promise<void> {
   await guarded(async (db) => {
-    await deactivateCurrent(db);
-    await db.update("consent_terms", str(fd, "id"), { active: true, published_at: new Date().toISOString() });
+    await db.rpc("activate_consent_term", { p_term_id: str(fd, "id") });
   }, PATHS);
 }

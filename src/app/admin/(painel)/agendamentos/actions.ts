@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { guarded, optStr, str, type ActionState } from "@/lib/admin-util";
 import { createManualAppointment, rescheduleAppointment } from "@/lib/admin-data";
 import { isValidDateISO } from "@/lib/date";
+import { withParam } from "@/lib/flash";
+import { refererPath } from "@/lib/referer";
 import type { AppointmentStatus } from "@/lib/types";
 
 const STATUSES: AppointmentStatus[] = ["pending", "confirmed", "completed", "cancelled"];
@@ -36,11 +38,14 @@ export async function createAppointmentAction(_prev: ActionState, fd: FormData):
 export async function setStatusAction(fd: FormData): Promise<void> {
   const status = str(fd, "status") as AppointmentStatus;
   if (!STATUSES.includes(status)) return;
-  await guarded((db) => db.update("appointments", str(fd, "id"), { status }).then(() => undefined), PATHS);
+  const res = await guarded((db) => db.update("appointments", str(fd, "id"), { status }).then(() => undefined), PATHS);
+  // Ex.: reabrir um agendamento cancelado cujo horário já foi ocupado por outro.
+  if (res?.error) redirect(withParam(await refererPath("/admin/agendamentos"), "erro", res.error));
 }
 
 export async function deleteAppointmentAction(fd: FormData): Promise<void> {
-  await guarded((db) => db.remove("appointments", str(fd, "id")), PATHS);
+  const res = await guarded((db) => db.remove("appointments", str(fd, "id")), PATHS);
+  if (res?.error) redirect(withParam(await refererPath("/admin/agendamentos"), "erro", res.error));
   if (str(fd, "redirect") === "list") redirect("/admin/agendamentos");
 }
 

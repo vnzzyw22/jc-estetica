@@ -11,7 +11,9 @@ const ORDER: ServiceCategory[] = ["facial_olhar", "corporal_modelagem", "terapia
  * Catálogo editorial: índice de categorias à esquerda, tratamentos em linhas grandes à direita.
  * Só aparece o que é conhecido: sem descrição, duração confirmada ou valor, a linha fica só com o nome.
  */
-export function Procedures({ services }: { services: Service[] }) {
+export function Procedures({ services, level = 3 }: { services: Service[]; level?: 2 | 3 }) {
+  // Na página /tratamentos o título da página é h1, então a lista começa em h2 (sem pular nível).
+  const Heading = level === 2 ? "h2" : "h3";
   const tabsId = useId();
   const categories = ORDER.filter((c) => services.some((s) => s.category === c));
   const [current, setCurrent] = useState<ServiceCategory>(categories[0] ?? "facial_olhar");
@@ -54,7 +56,7 @@ export function Procedures({ services }: { services: Service[] }) {
                 onClick={() => setCurrent(c)}
                 onKeyDown={(e) => onKey(e, idx)}
                 className={`group flex min-h-12 shrink-0 items-baseline gap-3 py-2 text-left font-serif text-[1.5rem] font-light leading-tight tracking-[-0.015em] transition-colors duration-[var(--duration-quick)] lg:text-[2rem] ${
-                  selected ? "text-espresso" : "text-cafe/60 hover:text-espresso"
+                  selected ? "text-espresso" : "text-cafe hover:text-espresso"
                 }`}
               >
                 <span className={`relative ${selected ? "after:absolute after:inset-x-0 after:-bottom-1 after:h-px after:bg-bisturi" : ""}`}>{CATEGORY_SHORT[c]}</span>
@@ -79,11 +81,11 @@ export function Procedures({ services }: { services: Service[] }) {
             return (
               <li key={s.id} className="group grid gap-x-8 gap-y-3 border-b border-linha py-6 md:grid-cols-[1fr_auto] md:items-baseline md:py-8">
                 <div>
-                  <h3 className="t-h3 lg:text-[2.25rem]">
+                  <Heading className="t-h3 lg:text-[2.25rem]">
                     <Link href={`/tratamentos/${s.slug}`} className="transition-colors duration-[var(--duration-quick)] group-hover:text-bisturi">
                       {s.name}
                     </Link>
-                  </h3>
+                  </Heading>
                   {s.indication && <p className="mt-2 max-w-[52ch] text-[0.95rem] text-cafe">{s.indication}</p>}
                   {s.description && <p className="mt-3 max-w-[60ch]">{s.description}</p>}
                 </div>

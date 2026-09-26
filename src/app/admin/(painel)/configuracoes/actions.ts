@@ -17,6 +17,8 @@ export async function saveSettingsAction(_prev: ActionState, fd: FormData): Prom
   const notice = Math.round(num(fd, "min_notice_hours", 2));
   const ahead = Math.round(num(fd, "max_days_ahead", 60));
   const buffer = Math.round(num(fd, "buffer_minutes", 0));
+  const evaluation = Math.round(num(fd, "evaluation_duration_minutes", 60));
+  if (evaluation < 5 || evaluation > 480) return { error: "A duração da avaliação deve ficar entre 5 e 480 minutos." };
   if (interval < 5 || interval > 240) return { error: "O intervalo entre horários deve ficar entre 5 e 240 minutos." };
   if (notice < 0 || buffer < 0) return { error: "Antecedência e intervalo entre atendimentos não podem ser negativos." };
   if (ahead < 1 || ahead > 365) return { error: "A janela de agendamento deve ficar entre 1 e 365 dias." };
@@ -35,6 +37,7 @@ export async function saveSettingsAction(_prev: ActionState, fd: FormData): Prom
       min_notice_hours: notice,
       max_days_ahead: ahead,
       buffer_minutes: buffer,
+      evaluation_duration_minutes: evaluation,
       auto_confirm: bool(fd, "auto_confirm"),
     });
     return "Configurações salvas.";
