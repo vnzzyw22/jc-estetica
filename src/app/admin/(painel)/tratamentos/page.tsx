@@ -31,7 +31,7 @@ export default async function TreatmentsPage({ searchParams }: { searchParams: S
   const filter: Filter = FILTERS.some((f) => f.value === sp.filtro) ? (sp.filtro as Filter) : "abertos";
 
   const now = Date.parse(nowISO());
-  const rows = await loadTreatmentOverview(db);
+  const rows = await loadTreatmentOverview(db, now);
   const count = (f: Filter) => (f === "todos" ? rows.length : f === "abertos" ? rows.filter((r) => OPEN.includes(r.treatment.status)).length : rows.filter((r) => r.treatment.status === f).length);
   const visible = rows.filter((r) => (filter === "todos" ? true : filter === "abertos" ? OPEN.includes(r.treatment.status) : r.treatment.status === filter));
   // Em andamento primeiro; depois quem tem sessão marcada mais cedo.

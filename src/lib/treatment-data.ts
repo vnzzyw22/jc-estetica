@@ -53,10 +53,12 @@ export interface TreatmentOverviewRow {
   progress: Progress;
   /** Início da sessão em aberto com horário mais cedo (ISO). Pode já ter passado. */
   nextAt: string | null;
+  /** Sessões em aberto cujo horário já passou sem serem marcadas como realizadas. */
+  pastOpen: number;
 }
 
 /** Lista geral: cada tratamento com progresso e a próxima sessão com horário (mesmo que o horário já tenha passado sem a sessão ser concluída). */
-export async function loadTreatmentOverview(db: Db): Promise<TreatmentOverviewRow[]> {
+export async function loadTreatmentOverview(db: Db, nowMs: number): Promise<TreatmentOverviewRow[]> {
   const [treatments, clients, sessions, upcoming] = await Promise.all([
     db.list("treatments", { order: [["proposed_at", "desc"]] }),
     db.list("clients"),
@@ -73,6 +75,7 @@ export async function loadTreatmentOverview(db: Db): Promise<TreatmentOverviewRo
   return treatments.map((t) => {
     const list = byTreatment.get(t.id) ?? [];
     const starts = list.map((s) => (s.appointment_id ? startById.get(s.appointment_id) : undefined)).filter((x): x is string => Boolean(x)).sort();
-    return { treatment: t, client: clientById.get(t.client_id) ?? null, progress: sessionProgress(list), nextAt: starts[0] ?? null };
+    const pastOpen = starts.filter((s) => Date.parse(s) < nowMs).length;
+    return { treatment: t, client: clientById.get(t.client_id) ?? null, progress: sessionProgress(list), nextAt: starts[0] ?? null, pastOpen };
   });
 }

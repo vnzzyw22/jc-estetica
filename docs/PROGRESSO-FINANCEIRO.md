@@ -1,6 +1,6 @@
-# Financeiro (Etapa 6) e Tratamentos (Etapa 5): estado
+# Financeiro (6), Tratamentos (5) e Dashboard (7): estado
 
-Telas das duas etapas concluídas em 2026-09-26. Este arquivo registra o que falta para colocar no ar.
+Telas das três etapas concluídas em 2026-09-26. Este arquivo registra o que falta para colocar no ar.
 
 ## Pronto e verificado
 
@@ -14,14 +14,18 @@ Telas das duas etapas concluídas em 2026-09-26. Este arquivo registra o que fal
 - `src/lib/treatment.ts` (regras puras, 20 testes unitários), `src/lib/treatment-data.ts` (carregadores).
 - Telas: `/admin/pacotes` (catálogo, serviços em ordem), `/admin/tratamentos` (lista com progresso e próxima sessão) e `/admin/tratamentos/[id]` (iniciar, pausar, retomar, cancelar, agendar e remarcar sessões, marcar como realizada com nota, evolução, parcelas, edição). Aba **Tratamentos** na ficha da cliente e sessões realizadas na linha do tempo.
 
+**Dashboard (Etapa 7)**
+- `src/lib/dashboard.ts` (fila de atenção e agrupamento por dia, puros, 9 testes), `src/lib/dashboard-data.ts` (carregador: uma consulta de agenda em vez de três).
+- Tela: precisa de atenção, números do dia, agenda de hoje, próximos agendamentos, financeiro do mês e tratamentos em andamento. Testada com dados demonstrativos e com o banco vazio ("Tudo em dia").
+
 **Verificação (2026-09-26)**
-- `npm run lint`, `npm run typecheck`, `npm test` (70 unitários + 104 SQL), `npm run build` e `node scripts/verify-bundle.mjs` (anônimo barrado nas funções administrativas, inclusive as três novas): passam.
+- `npm run lint`, `npm run typecheck`, `npm test` (79 unitários + 104 SQL), `npm run build` e `node scripts/verify-bundle.mjs` (anônimo barrado nas funções administrativas, inclusive as três novas): passam.
 - Navegador, com dados demonstrativos: 23 fluxos do financeiro e 32 fluxos de tratamentos, todos passando. Sem rolagem horizontal em 320, 375, 390, 430 e 1280 px.
 
 ## Falta
 1. **Aplicar as migrações 6 e 7 no Supabase real** (SQL Editor, nessa ordem; `npm run db:bundle` já as inclui no arquivo completo). Sem isso, as telas de financeiro e de tratamentos falham em produção porque as funções não existem.
 2. **Teste ao vivo no Supabase**, com dados fictícios (nomes "Exemplo", telefone `009…`) e limpeza depois. Nada disso rodou contra um Supabase real. Ponto a observar: chamadas de função com lista de ids (`save_package_services`) passam pelo cliente do Supabase, que só foi exercitado no banco local.
-3. **Etapa 7**: o dashboard ainda não mostra financeiro nem tratamentos.
+3. **Polimento** (etapa final do roadmap): revisão visual geral e acessibilidade.
 4. Fotos de evolução: a coluna existe, o upload ainda não (deve ir para um bucket **privado**).
 
 ## Decisões mantidas

@@ -77,7 +77,7 @@ Modelo completo, regras, checklist de segurança para rodar no Supabase e riscos
 
 ## Testes
 
-`npm test` roda os testes unitários (70: triagem, etapa da cliente, anamnese, regras do financeiro e de tratamentos) e os de SQL num Postgres real (104: RLS, conflito de agenda, triagem, anamnese, pacote → sessões → financeiro, recebimentos, recorrentes, cancelar e pausar tratamento). Os unitários importam arquivos `.ts` direto, o que exige Node 22.18 ou superior. Antes de publicar: `npm run lint && npm run typecheck && npm test && npm run build`.
+`npm test` roda os testes unitários (79: triagem, etapa da cliente, anamnese, regras do financeiro, de tratamentos e do dashboard) e os de SQL num Postgres real (104: RLS, conflito de agenda, triagem, anamnese, pacote → sessões → financeiro, recebimentos, recorrentes, cancelar e pausar tratamento). Os unitários importam arquivos `.ts` direto, o que exige Node 22.18 ou superior. Antes de publicar: `npm run lint && npm run typecheck && npm test && npm run build`.
 
 ## Triagem pública (`/triagem`)
 
@@ -92,6 +92,16 @@ Cinco passos curtos (queixa, objetivo, contexto, rotina, contato), resumo e conf
 - **Resumo:** próximo agendamento, último atendimento, triagem, anamnese, dados de contato e **linha do tempo** (cadastro, triagens, anamneses, agenda, tratamentos).
 - **Anamnese:** de um lado o que a cliente informou na triagem (pré-anamnese, somente leitura); do outro o registro profissional (avaliação, histórico, contraindicações, informações adicionais, observações). Tem rascunho, conclusão (fica somente leitura), reabertura e reavaliação (nova anamnese; a anterior fica no histórico). **Não há campo de diagnóstico.** Concluir a anamnese de uma triagem move a triagem para "Avaliada".
 - **Etapa (calculada, nada gravado):** *Lead* enviou triagem e ainda não foi atendida; *Cliente* já foi atendida ou tem agendamento de serviço; *Em tratamento* tem tratamento ativo ou pausado. Tratamentos e financeiro têm abas próprias na ficha (ver as seções abaixo).
+
+## Dashboard (`/admin/dashboard`)
+
+A primeira tela responde "o que precisa da minha atenção agora?".
+
+- **Precisa de atenção:** só o que é maior que zero, do mais urgente ao menos. Recebimentos atrasados (com o valor), sessões que passaram sem serem marcadas como realizadas, triagens novas esperando retorno, agendamentos aguardando confirmação, tratamentos em andamento sem sessão marcada e despesas atrasadas. Cada linha leva à lista já filtrada. Sem nada pendente: "Tudo em dia". A regra é pura e testada em `src/lib/dashboard.ts`.
+- **Números do dia:** atendimentos de hoje, próximos 7 dias e tratamentos em andamento.
+- **Agenda de hoje** e **próximos agendamentos** (14 dias).
+- **Financeiro do mês:** resultado, recebido, a receber e a pagar, com atalho para o financeiro.
+- **Tratamentos em andamento:** progresso e a próxima sessão; a que já passou aparece em vermelho.
 
 ## Tratamentos e pacotes (`/admin/tratamentos`, `/admin/pacotes`)
 
