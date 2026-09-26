@@ -9,6 +9,7 @@ const LINKS = [
   { href: "/admin/agenda", label: "Agenda" },
   { href: "/admin/agendamentos", label: "Agendamentos" },
   { href: "/admin/clientes", label: "Clientes" },
+  { href: "/admin/financeiro", label: "Financeiro" },
   { href: "/admin/servicos", label: "Serviços" },
   { href: "/admin/horarios", label: "Horários" },
   { href: "/admin/bloqueios", label: "Bloqueios" },

@@ -4,9 +4,11 @@ import { rescheduleAction, saveNotesAction } from "@/app/admin/(painel)/agendame
 import { AdminForm } from "@/components/admin/admin-form";
 import { AppointmentActions } from "@/components/admin/appointment-actions";
 import { Field, PageTitle, StatusBadge } from "@/components/admin/ui";
+import { PaymentChip } from "@/components/admin/finance/finance-chip";
 import { requireAdmin } from "@/lib/auth";
-import { dateISOFromEpoch, dayLabel, timeLabel } from "@/lib/date";
-import { formatDuration, formatPrice } from "@/lib/format";
+import { dateISOFromEpoch, dayLabel, timeLabel, todayISO } from "@/lib/date";
+import { paymentView } from "@/lib/finance";
+import { formatDuration, formatMoney, formatPrice } from "@/lib/format";
 import { whatsappLink } from "@/lib/whatsapp";
 
 export const metadata = { title: "Agendamento" };
@@ -17,7 +19,12 @@ export default async function AppointmentDetailPage({ params }: { params: Promis
   const appt = await db.get("appointments", id);
   if (!appt) notFound();
 
-  const [client, service] = await Promise.all([db.get("clients", appt.client_id), appt.service_id ? db.get("services", appt.service_id) : Promise.resolve(null)]);
+  const [client, service, payments] = await Promise.all([
+    db.get("clients", appt.client_id),
+    appt.service_id ? db.get("services", appt.service_id) : Promise.resolve(null),
+    db.list("payments", { eq: { appointment_id: appt.id } }),
+  ]);
+  const today = todayISO();
   const dateISO = dateISOFromEpoch(new Date(appt.starts_at).getTime());
   const time = timeLabel(appt.starts_at);
   const minutes = Math.round((new Date(appt.ends_at).getTime() - new Date(appt.starts_at).getTime()) / 60_000);
@@ -55,6 +62,26 @@ export default async function AppointmentDetailPage({ params }: { params: Promis
           <div className="mt-6">
             <AppointmentActions id={appt.id} status={appt.status} redirectToList />
           </div>
+
+          <h3 className="t-h3 mt-12 mb-4">Pagamento</h3>
+          {payments.length > 0 && (
+            <ul className="tnum border-t border-linha">
+              {payments.map((p) => (
+                <li key={p.id} className="border-b border-linha">
+                  <Link href={`/admin/financeiro/recebimentos/${p.id}`} className="grid grid-cols-[1fr_auto_auto] items-baseline gap-x-4 py-3 transition-colors hover:bg-seda/60">
+                    <span>{p.description ?? "Recebimento"}</span>
+                    <span>{formatMoney(p.amount)}</span>
+                    <PaymentChip view={paymentView(p, today)} />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+          {appt.status !== "cancelled" && (
+            <Link href={`/admin/financeiro/recebimentos?atendimento=${appt.id}`} className={`link-draw font-medium ${payments.length ? "mt-4" : ""}`}>
+              {payments.length ? "Registrar outro pagamento" : "Registrar pagamento deste atendimento"}
+            </Link>
+          )}
 
           <h3 className="t-h3 mt-12 mb-4">Cliente</h3>
           {client ? (

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
-import { addMonths, csvLine, daysLate, installmentLabel, isMonth, monthRange, monthSeries, overdueRows, parseMoney, paymentView, periodTotals, splitInstallments, sumBy, totalsOf } from "../../src/lib/finance.ts";
+import { addMonths, csvLine, daysLate, groupByDay, queryString, installmentLabel, isMonth, monthRange, monthSeries, overdueRows, parseMoney, paymentView, periodTotals, splitInstallments, sumBy, sumMoney, totalsOf } from "../../src/lib/finance.ts";
 
 const row = (o) => ({ direction: "in", occurred_on: "2026-09-10", amount: 100, state: "realized", source: "payment", source_id: "x", client_id: null, treatment_id: null, category: "other", description: null, method: null, category_name: null, ...o });
 
@@ -132,5 +132,39 @@ describe("csvLine", () => {
   test("texto que começa como fórmula é neutralizado; número negativo não", () => {
     assert.equal(csvLine(["=SOMA(A1)"]), "'=SOMA(A1)");
     assert.equal(csvLine([-5]), "-5,00");
+  });
+});
+
+describe("groupByDay", () => {
+  test("dia mais recente primeiro; dentro do dia, realizado antes do previsto", () => {
+    const g = groupByDay([
+      row({ occurred_on: "2026-09-02", amount: 1 }),
+      row({ occurred_on: "2026-09-10", amount: 2, state: "expected" }),
+      row({ occurred_on: "2026-09-10", amount: 3 }),
+      row({ occurred_on: "2026-09-05", amount: 4 }),
+    ]);
+    assert.deepEqual(g.map((d) => d.date), ["2026-09-10", "2026-09-05", "2026-09-02"]);
+    assert.deepEqual(g[0].rows.map((r) => r.amount), [3, 2]);
+  });
+  test("sem movimento, sem grupos", () => {
+    assert.deepEqual(groupByDay([]), []);
+  });
+});
+
+describe("queryString", () => {
+  test("só entra o que tem valor; sem nada, devolve vazio", () => {
+    assert.equal(queryString({ mes: "2026-09", filtro: "", x: null, y: undefined }), "?mes=2026-09");
+    assert.equal(queryString({}), "");
+  });
+  test("escapa caracteres especiais", () => {
+    assert.equal(queryString({ q: "a b&c" }), "?q=a+b%26c");
+  });
+});
+
+describe("sumMoney", () => {
+  test("soma em centavos: 0,1 + 0,2 = 0,3", () => {
+    assert.equal(sumMoney([0.1, 0.2]), 0.3);
+    assert.equal(sumMoney([]), 0);
+    assert.equal(sumMoney([33.33, 33.33, 33.34]), 100);
   });
 });

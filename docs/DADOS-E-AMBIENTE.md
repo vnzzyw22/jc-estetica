@@ -32,8 +32,9 @@ Só quatro. **Nenhuma é secreta e nenhuma chave privada (`service_role`) é usa
 3. `supabase/migrations/20260925130000_servicos_exibicao.sql` — `services.duration_confirmed` (o site só exibe duração confirmada).
 4. `supabase/migrations/20260925140000_triagem_publica.sql` — trava do termo (`settings.screening_requires_consent_term`, **padrão ligado**), `submit_screening` v2 e gatilhos que ligam avaliação à triagem.
 5. `supabase/migrations/20260926100000_anamnese.sql` — integridade da anamnese (índice de um rascunho por cliente, conclusão exige data e conteúdo, `completed_at`, e concluir a anamnese marca a triagem como avaliada).
-6. `supabase/seed.sql` — **produção**: configurações, horários padrão, 12 serviços reais, categorias de despesa, placeholders de conteúdo. Nenhum cliente, triagem ou valor.
-7. Criar o usuário no Auth e `insert into admin_profiles (user_id) values ('<uuid>')`.
+6. `supabase/migrations/20260927100000_financeiro.sql` — financeiro: `create_receivable` (à vista ou parcelado), `change_payment_status` (pendente → pago | cancelado, e de volta), `generate_recurring_expenses` (idempotente) e `cash_flow` com descrição, forma e categoria (colunas novas no fim). Sem tabela nova; a RLS é a existente. **Em um projeto que já tem as migrações 1 a 5, rode só esta.**
+7. `supabase/seed.sql` — **produção**: configurações, horários padrão, 12 serviços reais, categorias de despesa, placeholders de conteúdo. Nenhum cliente, triagem ou valor.
+8. Criar o usuário no Auth e `insert into admin_profiles (user_id) values ('<uuid>')`.
 
 Dados demonstrativos ficam em `supabase/demo/` e **nunca** entram no passo 6 (ver seção 6).
 
@@ -143,7 +144,7 @@ Comandos locais: `npm run demo:load`, `npm run demo:clear`, `npm run db:reset`. 
 
 ## 7. Testes
 
-`npm run test:sql` executa 68 testes em Postgres real (PGlite com as migrações verdadeiras e as permissões padrão do Supabase reproduzidas): RLS por papel (anônimo, autenticado sem perfil, admin), conflito de agenda, triagem, `create_booking`, fluxo pacote → sessões → agenda → financeiro, cobrança por sessão, `cash_flow` e o seed demo. Cobrem regras de banco; **não substituem** validar num Supabase real (seção 5).
+`npm run test:sql` executa 88 testes em Postgres real (PGlite com as migrações verdadeiras e as permissões padrão do Supabase reproduzidas): RLS por papel (anônimo, autenticado sem perfil, admin), conflito de agenda, triagem, `create_booking`, fluxo pacote → sessões → agenda → financeiro, cobrança por sessão, `cash_flow` e o seed demo. Cobrem regras de banco; **não substituem** validar num Supabase real (seção 5).
 
 ## 8. Riscos conhecidos
 

@@ -73,6 +73,9 @@ export function dayLabel(dateISO: string, style: "short" | "long" = "long"): str
     : `${weekdayLong(w)}, ${d} de ${monthName(m)}`;
 }
 
+/** "2026-09-25" (ou um ISO completo) → "25/09/2026". Só formata o texto: não converte fuso. */
+export const dateBR = (iso: string): string => iso.slice(0, 10).split("-").reverse().join("/");
+
 export function dateTimeLabel(iso: string): string {
   return `${dayLabel(dateISOFromEpoch(new Date(iso).getTime()), "short")} às ${timeLabel(iso)}`;
 }

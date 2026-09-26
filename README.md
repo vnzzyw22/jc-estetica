@@ -47,7 +47,8 @@ Nenhuma chave secreta é usada no código. **Não use a `service_role` neste pro
    3. [supabase/migrations/20260925130000_servicos_exibicao.sql](supabase/migrations/20260925130000_servicos_exibicao.sql) (só exibe duração confirmada)
    4. [supabase/migrations/20260925140000_triagem_publica.sql](supabase/migrations/20260925140000_triagem_publica.sql) (trava do termo de consentimento e estado da triagem comandado pela agenda)
    5. [supabase/migrations/20260926100000_anamnese.sql](supabase/migrations/20260926100000_anamnese.sql) (integridade da anamnese: um rascunho por cliente, conclusão exige data e conteúdo)
-   6. [supabase/seed.sql](supabase/seed.sql) (**produção**: configurações, horários padrão, os 12 serviços reais, categorias de despesa e placeholders de conteúdo; sem dados fictícios)
+   6. [supabase/migrations/20260927100000_financeiro.sql](supabase/migrations/20260927100000_financeiro.sql) (financeiro: `create_receivable`, `change_payment_status`, `generate_recurring_expenses` e o caixa `cash_flow` com descrição, forma e categoria)
+   7. [supabase/seed.sql](supabase/seed.sql) (**produção**: configurações, horários padrão, os 12 serviços reais, categorias de despesa e placeholders de conteúdo; sem dados fictícios)
    Atalho: `npm run db:bundle` gera **um único arquivo** (`supabase/setup-completo.sql`) com tudo isso, para um projeto vazio. Em um projeto que já tem as migrações anteriores, rode só a nova.
    (Ou, com a CLI: `supabase link` + `supabase db push`, depois rode o seed.)
 3. **Authentication → Users → Add user**: crie o login da Jennifer (e-mail + senha).
@@ -75,7 +76,7 @@ Modelo completo, regras, checklist de segurança para rodar no Supabase e riscos
 
 ## Testes
 
-`npm test` roda os testes unitários (25: triagem, etapa da cliente, anamnese) e os de SQL num Postgres real (68: RLS, conflito de agenda, triagem, anamnese, pacote → sessões → financeiro). Antes de publicar: `npm run lint && npm run typecheck && npm test && npm run build`.
+`npm test` roda os testes unitários (50: triagem, etapa da cliente, anamnese, regras do financeiro) e os de SQL num Postgres real (88: RLS, conflito de agenda, triagem, anamnese, pacote → sessões → financeiro, recebimentos, recorrentes). Os unitários importam arquivos `.ts` direto, o que exige Node 22.18 ou superior. Antes de publicar: `npm run lint && npm run typecheck && npm test && npm run build`.
 
 ## Triagem pública (`/triagem`)
 
@@ -91,9 +92,20 @@ Cinco passos curtos (queixa, objetivo, contexto, rotina, contato), resumo e conf
 - **Anamnese:** de um lado o que a cliente informou na triagem (pré-anamnese, somente leitura); do outro o registro profissional (avaliação, histórico, contraindicações, informações adicionais, observações). Tem rascunho, conclusão (fica somente leitura), reabertura e reavaliação (nova anamnese; a anterior fica no histórico). **Não há campo de diagnóstico.** Concluir a anamnese de uma triagem move a triagem para "Avaliada".
 - **Etapa (calculada, nada gravado):** *Lead* enviou triagem e ainda não foi atendida; *Cliente* já foi atendida ou tem agendamento de serviço; *Em tratamento* tem tratamento ativo ou pausado. Tratamentos, sessões, evolução e financeiro entram na ficha nas Etapas 5 e 6.
 
+## Financeiro (`/admin/financeiro`)
+
+Quatro abas: **Visão geral** (resultado do mês em um número grande, recebido, pago, a receber, a pagar, atrasados e extrato por dia), **Recebimentos**, **Despesas** e **Relatórios**. Todas têm troca de mês pela URL (`?mes=2026-09`).
+
+- **Recebimentos:** à vista ou parcelado (1 a 36; a última parcela absorve os centavos), avulso ou ligado a cliente, tratamento e atendimento. Filtros A receber, Recebidos, Atrasados e Cancelados. **Receber** abre o formulário na própria linha e exige a forma de pagamento. Recebido pode ser desfeito; cobrança cancelada pode ser restaurada; recebimento já pago não é apagado (desfaça antes). Cobrança por WhatsApp em pendentes e atrasados.
+- **Despesas:** categorias fixas e variáveis, pagar e desfazer, e **Repetir despesas recorrentes** (cria as do mês, já a pagar; não duplica).
+- **Relatórios:** resultado, série de 6 meses, recebido por forma e por tipo, despesas por categoria e fixas × variáveis, pendências e atividade (atendimentos, sessões, clientes novas, origem das triagens).
+- **Planilha:** `Baixar planilha (CSV)` na visão geral (`;` como separador e vírgula decimal; abre direto no Excel). Só administradora.
+- **Ficha da cliente:** aba **Financeiro** (resumo, cobranças, gerar parcelas de um tratamento, novo recebimento) e evento "Recebimento" na linha do tempo. No detalhe de um agendamento, **Registrar pagamento** abre o formulário já ligado ao atendimento.
+- **Caixa:** recebido conta na data do pagamento; previsto, no vencimento; cancelado não entra. Ver `cash_flow` em [docs/DADOS-E-AMBIENTE.md](docs/DADOS-E-AMBIENTE.md).
+
 ## Painel (`/admin`)
 
-Dashboard, **Triagens** (lista com filtros, detalhe, estado, observações internas e agendamento de avaliação), Agenda (dia, semana, mês), Agendamentos (criar, confirmar, concluir, cancelar, remarcar, excluir), Clientes (**ficha** com Resumo e linha do tempo, Triagem, Anamnese e Agenda; etapa Lead, Cliente ou Em tratamento calculada), Serviços, Horários, Bloqueios, Galeria (upload), Conteúdo (textos e fotos do site), FAQ, Consentimento (texto oficial da triagem) e Configurações (WhatsApp, Instagram, endereço, regras de agendamento).
+Dashboard, **Triagens** (lista com filtros, detalhe, estado, observações internas e agendamento de avaliação), Agenda (dia, semana, mês), Agendamentos (criar, confirmar, concluir, cancelar, remarcar, excluir), Clientes (**ficha** com Resumo e linha do tempo, Triagem, Anamnese, Agenda e Financeiro; etapa Lead, Cliente ou Em tratamento calculada), **Financeiro**, Serviços, Horários, Bloqueios, Galeria (upload), Conteúdo (textos e fotos do site), FAQ, Consentimento (texto oficial da triagem) e Configurações (WhatsApp, Instagram, endereço, regras de agendamento).
 
 ## Conteúdo que ainda precisa ser informado
 

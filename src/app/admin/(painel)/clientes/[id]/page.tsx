@@ -4,6 +4,8 @@ import { deleteClientAction, saveClientAction } from "@/app/admin/(painel)/clien
 import { AdminForm } from "@/components/admin/admin-form";
 import { AgendaTab } from "@/components/admin/client/agenda-tab";
 import { AnamnesisTab } from "@/components/admin/client/anamnesis-tab";
+import { FinanceTab } from "@/components/admin/client/finance-tab";
+import { Notice } from "@/components/admin/finance/notice";
 import { Timeline } from "@/components/admin/client/timeline";
 import { ConfirmButton } from "@/components/admin/confirm-button";
 import { ScreeningData } from "@/components/admin/screening-data";
@@ -12,7 +14,8 @@ import { StageChip } from "@/components/admin/stage-chip";
 import { requireAdmin } from "@/lib/auth";
 import { loadClientFile } from "@/lib/client-file";
 import { dateTimeLabel, nowISO, todayISO } from "@/lib/date";
-import { maskPhone } from "@/lib/format";
+import { sumMoney } from "@/lib/finance";
+import { formatMoney, maskPhone } from "@/lib/format";
 import { labels } from "@/lib/screening";
 import { whatsappLink } from "@/lib/whatsapp";
 
@@ -23,10 +26,11 @@ const TABS = [
   { key: "triagem", label: "Triagem" },
   { key: "anamnese", label: "Anamnese" },
   { key: "agenda", label: "Agenda" },
+  { key: "financeiro", label: "Financeiro" },
 ] as const;
 type Tab = (typeof TABS)[number]["key"];
 
-type Search = Promise<{ aba?: string; id?: string; erro?: string }>;
+type Search = Promise<{ aba?: string; id?: string; erro?: string; aviso?: string; receber?: string }>;
 
 function Fact({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -55,6 +59,8 @@ export default async function ClientFilePage({ params, searchParams }: { params:
   const draft = anamneses.find((a) => a.status === "draft");
   const lastCompleted = anamneses.find((a) => a.status === "completed");
   const activeTreatments = treatments.filter((t) => t.status === "active" || t.status === "paused").length;
+  const receivedSum = sumMoney(file.payments.filter((p) => p.status === "paid").map((p) => p.amount));
+  const openSum = sumMoney(file.payments.filter((p) => p.status === "pending").map((p) => p.amount));
 
   const [services, terms] = await Promise.all([tab === "agenda" ? db.list("services", { eq: { active: true }, order: [["display_order", "asc"]] }) : Promise.resolve([]), tab === "triagem" ? db.list("consent_terms") : Promise.resolve([])]);
   const termById = new Map(terms.map((t) => [t.id, t]));
@@ -65,6 +71,7 @@ export default async function ClientFilePage({ params, searchParams }: { params:
     triagem: screenings.length ? { short: String(screenings.length), full: String(screenings.length) } : null,
     anamnese: draft ? { short: "•", full: "rascunho" } : lastCompleted ? { short: "", full: "concluída" } : null,
     agenda: appointments.length ? { short: String(appointments.length), full: String(appointments.length) } : null,
+    financeiro: file.payments.length ? { short: String(file.payments.length), full: String(file.payments.length) } : null,
   };
 
   return (
@@ -110,11 +117,7 @@ export default async function ClientFilePage({ params, searchParams }: { params:
         })}
       </nav>
 
-      {erro && (
-        <p role="alert" className="mb-8 max-w-[64ch] border-l-2 border-alerta bg-alerta/5 px-4 py-3 text-[0.95rem] text-alerta">
-          {erro}
-        </p>
-      )}
+      <Notice erro={erro ?? undefined} aviso={sp.aviso} />
 
       {tab === "resumo" && (
         <div className="grid gap-x-12 gap-y-12 xl:grid-cols-2">
@@ -155,6 +158,11 @@ export default async function ClientFilePage({ params, searchParams }: { params:
                   )}
                 </Fact>
                 <Fact label="Tratamentos ativos">{activeTreatments}</Fact>
+                <Fact label="Financeiro">
+                  <Link href={`/admin/clientes/${client.id}?aba=financeiro`} className="link-draw">
+                    {file.payments.length ? `Recebido ${formatMoney(receivedSum)}, a receber ${formatMoney(openSum)}` : "Sem cobranças"}
+                  </Link>
+                </Fact>
               </dl>
             </section>
 
@@ -228,6 +236,7 @@ export default async function ClientFilePage({ params, searchParams }: { params:
 
       {tab === "anamnese" && <AnamnesisTab file={file} selectedId={sp.id} today={todayISO()} />}
       {tab === "agenda" && <AgendaTab file={file} services={services} nowMs={nowMs} />}
+      {tab === "financeiro" && <FinanceTab file={file} today={todayISO()} receiving={sp.receber} />}
     </>
   );
 }

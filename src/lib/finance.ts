@@ -38,6 +38,11 @@ export function parseMoney(input: string | null | undefined): number | null {
   return Number.isFinite(n) ? Math.round(n * 100) / 100 : null;
 }
 
+/** Soma valores em reais sem erro de ponto flutuante (conta em centavos). */
+export function sumMoney(values: number[]): number {
+  return reais(values.reduce((sum, v) => sum + cents(v), 0));
+}
+
 export interface Totals {
   /** Entradas que já aconteceram. */
   received: number;
@@ -62,8 +67,12 @@ export function totalsOf(rows: CashFlowRow[]): Totals {
   let toPay = 0;
   for (const r of rows) {
     const c = cents(r.amount);
-    if (r.direction === "in") r.state === "realized" ? (received += c) : (toReceive += c);
-    else r.state === "realized" ? (paid += c) : (toPay += c);
+    const done = r.state === "realized";
+    if (r.direction === "in") {
+      if (done) received += c;
+      else toReceive += c;
+    } else if (done) paid += c;
+    else toPay += c;
   }
   return {
     received: reais(received),
@@ -137,6 +146,28 @@ export function splitInstallments(total: number, count: number): number[] {
   const totalC = cents(total);
   const base = Math.trunc(totalC / count);
   return Array.from({ length: count }, (_, i) => reais(i === count - 1 ? totalC - base * (count - 1) : base));
+}
+
+export interface DayGroup {
+  date: string;
+  rows: CashFlowRow[];
+}
+
+/** Agrupa o extrato por dia, do mais recente ao mais antigo; dentro do dia, o realizado vem antes do previsto. */
+export function groupByDay(rows: CashFlowRow[]): DayGroup[] {
+  const map = new Map<string, CashFlowRow[]>();
+  for (const r of rows) map.set(r.occurred_on, [...(map.get(r.occurred_on) ?? []), r]);
+  return [...map.entries()]
+    .sort((a, b) => (a[0] < b[0] ? 1 : a[0] > b[0] ? -1 : 0))
+    .map(([date, list]) => ({ date, rows: [...list].sort((a, b) => Number(a.state === "expected") - Number(b.state === "expected")) }));
+}
+
+/** "?a=1&b=2" só com os valores preenchidos; vazio quando não sobra nenhum. */
+export function queryString(params: Record<string, string | null | undefined>): string {
+  const q = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) if (value) q.set(key, value);
+  const text = q.toString();
+  return text ? `?${text}` : "";
 }
 
 /** Uma linha de CSV para planilha em português: separador ";" e vírgula decimal. */
