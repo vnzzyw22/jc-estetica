@@ -18,7 +18,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
       <a href="#conteudo" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:bg-espresso focus:px-4 focus:py-2 focus:text-porcelana">
         Pular para o conteúdo
       </a>
-      <aside className="border-b border-linha px-[var(--spacing-gutter)] py-3 lg:sticky lg:top-0 lg:h-dvh lg:border-b-0 lg:border-r lg:px-4 lg:py-8">
+      <aside className="border-b border-linha px-[var(--spacing-gutter)] py-3 lg:sticky lg:top-0 lg:flex lg:h-dvh lg:flex-col lg:border-b-0 lg:border-r lg:px-4 lg:py-8">
         <div className="mb-3 flex items-center justify-between lg:mb-8 lg:block">
           <Link href="/admin/dashboard" className="font-serif text-xl font-light">
             Jennifer Camila
@@ -27,8 +27,11 @@ export default async function PanelLayout({ children }: { children: React.ReactN
             Ver site
           </Link>
         </div>
-        <AdminNav newScreenings={newScreenings} />
-        <form action={signOut} className="hidden lg:absolute lg:bottom-6 lg:left-4 lg:right-4 lg:block">
+        {/* O menu rola por dentro se a tela for baixa: "Sair" nunca fica por cima dele. */}
+        <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+          <AdminNav newScreenings={newScreenings} />
+        </div>
+        <form action={signOut} className="hidden lg:mt-4 lg:block lg:border-t lg:border-linha lg:pt-4">
           <p className="t-small mb-2 truncate">{user.email}</p>
           <button type="submit" className="link-draw min-h-9 text-[0.9rem]">
             Sair

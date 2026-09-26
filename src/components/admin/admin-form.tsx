@@ -26,7 +26,7 @@ export function AdminForm({ action, children, submitLabel = "Salvar", className 
   return (
     <form ref={ref} action={formAction} className={className}>
       {children}
-      <div className="mt-5 flex flex-wrap items-center gap-4">
+      <div className="col-span-full mt-5 flex flex-wrap items-center gap-4">
         {!hideSubmit && (
           <button type="submit" className="btn btn-sm" disabled={pending}>
             {pending ? "Salvando…" : submitLabel}

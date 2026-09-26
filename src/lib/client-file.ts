@@ -2,7 +2,7 @@ import type { Db } from "@/lib/data/db";
 import { clientStage, type ClientStage } from "@/lib/client-stage";
 import { KIND_LABEL, STATUS_LABEL, formatMoney } from "@/lib/format";
 import { SOURCE_LABEL, labels } from "@/lib/screening";
-import type { Anamnesis, AppointmentDetail, Client, Payment, Screening, Service, Treatment } from "@/lib/types";
+import type { Anamnesis, AppointmentDetail, Client, Payment, Screening, Service, Treatment, TreatmentSession } from "@/lib/types";
 
 export type TimelineKind = "cadastro" | "triagem" | "anamnese" | "agenda" | "tratamento" | "financeiro";
 
@@ -24,6 +24,8 @@ export interface ClientFile {
   appointments: AppointmentDetail[];
   treatments: Treatment[];
   payments: Payment[];
+  /** Sessões de todos os tratamentos da cliente. */
+  sessions: TreatmentSession[];
   timeline: TimelineItem[];
 }
 
@@ -59,9 +61,17 @@ export function buildTimeline(f: Omit<ClientFile, "timeline" | "stage">, now: nu
   }
 
   for (const t of f.treatments) {
-    items.push({ at: t.proposed_at, kind: "tratamento", title: `Tratamento proposto: ${t.name}` });
-    if (t.started_at) items.push({ at: t.started_at, kind: "tratamento", title: `Tratamento iniciado: ${t.name}` });
-    if (t.completed_at) items.push({ at: t.completed_at, kind: "tratamento", title: `Tratamento concluído: ${t.name}` });
+    const href = `/admin/tratamentos/${t.id}`;
+    items.push({ at: t.proposed_at, kind: "tratamento", title: `Tratamento proposto: ${t.name}`, href });
+    if (t.started_at) items.push({ at: t.started_at, kind: "tratamento", title: `Tratamento iniciado: ${t.name}`, href });
+    if (t.completed_at) items.push({ at: t.completed_at, kind: "tratamento", title: `Tratamento concluído: ${t.name}`, href });
+  }
+
+  // Sessões realizadas entram na história; as a agendar ficam na página do tratamento.
+  const nameOf = new Map(f.treatments.map((t) => [t.id, t.name]));
+  for (const s of f.sessions) {
+    if (s.status !== "completed" || !s.performed_at) continue;
+    items.push({ at: s.performed_at, kind: "tratamento", title: `Sessão ${s.number} realizada`, detail: nameOf.get(s.treatment_id), href: `/admin/tratamentos/${s.treatment_id}` });
   }
 
   // Só o que já entrou: cobranças pendentes ficam na aba Financeiro, sem poluir a história da cliente.
@@ -90,6 +100,8 @@ export async function loadClientFile(db: Db, id: string, now: number = Date.now(
   const serviceById = new Map<string, Service>(services.map((s) => [s.id, s]));
   const appointments: AppointmentDetail[] = appts.map((a) => ({ ...a, client, service: a.service_id ? (serviceById.get(a.service_id) ?? null) : null }));
 
-  const base = { client, screenings, anamneses, appointments, treatments, payments };
+  const sessions = (await Promise.all(treatments.map((t) => db.list("treatment_sessions", { eq: { treatment_id: t.id }, order: [["number", "asc"]] })))).flat();
+
+  const base = { client, screenings, anamneses, appointments, treatments, payments, sessions };
   return { ...base, stage: clientStage({ screenings, treatments, appointments }), timeline: buildTimeline(base, now) };
 }

@@ -219,7 +219,7 @@ export function createPgliteDb(): Db {
       if (!SAFE_IDENT.test(fn)) throw new DbError("invalid_function", `Função inválida: ${fn}`);
       const names = Object.keys(args);
       const call = names.map((n, i) => `${column(n)} := $${i + 1}`).join(", ");
-      return run(async (db) => (await db.query<{ result: unknown }>(`select public.${fn}(${call}) as result`, names.map((n) => param(args[n])))).rows[0]?.result as T);
+      return run(async (db) => (await db.query<{ result: unknown }>(`select public.${fn}(${call}) as result`, names.map((n) => (Array.isArray(args[n]) ? args[n] : param(args[n]))))).rows[0]?.result as T);
     },
 
     async uploadMedia(file, folder) {

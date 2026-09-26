@@ -17,5 +17,8 @@ await db.exec("set role anon");
 const anonFn = async (f) => { try { await db.query(`select public.${f}`); return "EXECUTA"; } catch (e) { return e.code === "42501" ? "negado" : "outro:" + e.message; } };
 console.log("anon → activate_treatment:", await anonFn("activate_treatment('00000000-0000-0000-0000-000000000000')"));
 console.log("anon → schedule_session:", await anonFn("schedule_session('00000000-0000-0000-0000-000000000000', now())"));
+console.log("anon → cancel_treatment:", await anonFn("cancel_treatment('00000000-0000-0000-0000-000000000000')"));
+console.log("anon → pause_treatment:", await anonFn("pause_treatment('00000000-0000-0000-0000-000000000000')"));
+console.log("anon → save_package_services:", await anonFn("save_package_services('00000000-0000-0000-0000-000000000000', '{}'::uuid[])"));
 console.log("anon lê screenings:", (await q("select count(*)::int n from screenings"))[0].n, "linhas");
 await db.exec("reset role");

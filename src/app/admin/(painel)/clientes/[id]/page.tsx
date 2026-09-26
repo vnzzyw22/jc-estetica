@@ -5,6 +5,7 @@ import { AdminForm } from "@/components/admin/admin-form";
 import { AgendaTab } from "@/components/admin/client/agenda-tab";
 import { AnamnesisTab } from "@/components/admin/client/anamnesis-tab";
 import { FinanceTab } from "@/components/admin/client/finance-tab";
+import { TreatmentsTab } from "@/components/admin/client/treatments-tab";
 import { Notice } from "@/components/admin/finance/notice";
 import { Timeline } from "@/components/admin/client/timeline";
 import { ConfirmButton } from "@/components/admin/confirm-button";
@@ -25,6 +26,7 @@ const TABS = [
   { key: "resumo", label: "Resumo" },
   { key: "triagem", label: "Triagem" },
   { key: "anamnese", label: "Anamnese" },
+  { key: "tratamentos", label: "Tratamentos" },
   { key: "agenda", label: "Agenda" },
   { key: "financeiro", label: "Financeiro" },
 ] as const;
@@ -62,7 +64,7 @@ export default async function ClientFilePage({ params, searchParams }: { params:
   const receivedSum = sumMoney(file.payments.filter((p) => p.status === "paid").map((p) => p.amount));
   const openSum = sumMoney(file.payments.filter((p) => p.status === "pending").map((p) => p.amount));
 
-  const [services, terms] = await Promise.all([tab === "agenda" ? db.list("services", { eq: { active: true }, order: [["display_order", "asc"]] }) : Promise.resolve([]), tab === "triagem" ? db.list("consent_terms") : Promise.resolve([])]);
+  const [services, terms, packages] = await Promise.all([tab === "agenda" ? db.list("services", { eq: { active: true }, order: [["display_order", "asc"]] }) : Promise.resolve([]), tab === "triagem" ? db.list("consent_terms") : Promise.resolve([]), tab === "tratamentos" ? db.list("treatment_packages", { order: [["display_order", "asc"]] }) : Promise.resolve([])]);
   const termById = new Map(terms.map((t) => [t.id, t]));
 
   // `short` é o que cabe no celular; `full` aparece a partir de sm.
@@ -70,6 +72,7 @@ export default async function ClientFilePage({ params, searchParams }: { params:
     resumo: null,
     triagem: screenings.length ? { short: String(screenings.length), full: String(screenings.length) } : null,
     anamnese: draft ? { short: "•", full: "rascunho" } : lastCompleted ? { short: "", full: "concluída" } : null,
+    tratamentos: treatments.length ? { short: String(treatments.length), full: String(treatments.length) } : null,
     agenda: appointments.length ? { short: String(appointments.length), full: String(appointments.length) } : null,
     financeiro: file.payments.length ? { short: String(file.payments.length), full: String(file.payments.length) } : null,
   };
@@ -157,7 +160,11 @@ export default async function ClientFilePage({ params, searchParams }: { params:
                     "Não iniciada"
                   )}
                 </Fact>
-                <Fact label="Tratamentos ativos">{activeTreatments}</Fact>
+                <Fact label="Tratamentos ativos">
+                  <Link href={`/admin/clientes/${client.id}?aba=tratamentos`} className="link-draw">
+                    {activeTreatments}
+                  </Link>
+                </Fact>
                 <Fact label="Financeiro">
                   <Link href={`/admin/clientes/${client.id}?aba=financeiro`} className="link-draw">
                     {file.payments.length ? `Recebido ${formatMoney(receivedSum)}, a receber ${formatMoney(openSum)}` : "Sem cobranças"}
@@ -235,6 +242,7 @@ export default async function ClientFilePage({ params, searchParams }: { params:
       )}
 
       {tab === "anamnese" && <AnamnesisTab file={file} selectedId={sp.id} today={todayISO()} />}
+      {tab === "tratamentos" && <TreatmentsTab file={file} packages={packages} />}
       {tab === "agenda" && <AgendaTab file={file} services={services} nowMs={nowMs} />}
       {tab === "financeiro" && <FinanceTab file={file} today={todayISO()} receiving={sp.receber} />}
     </>

@@ -9,8 +9,10 @@ const LINKS = [
   { href: "/admin/agenda", label: "Agenda" },
   { href: "/admin/agendamentos", label: "Agendamentos" },
   { href: "/admin/clientes", label: "Clientes" },
+  { href: "/admin/tratamentos", label: "Tratamentos" },
   { href: "/admin/financeiro", label: "Financeiro" },
   { href: "/admin/servicos", label: "Serviços" },
+  { href: "/admin/pacotes", label: "Pacotes" },
   { href: "/admin/horarios", label: "Horários" },
   { href: "/admin/bloqueios", label: "Bloqueios" },
   { href: "/admin/galeria", label: "Galeria" },
@@ -31,7 +33,7 @@ export function AdminNav({ newScreenings = 0 }: { newScreenings?: number }) {
             key={l.href}
             href={l.href}
             aria-current={active ? "page" : undefined}
-            className={`flex min-h-11 shrink-0 items-center whitespace-nowrap border-b-2 px-3 text-[0.95rem] transition-colors lg:border-b-0 lg:border-l-2 ${
+            className={`flex min-h-11 shrink-0 items-center whitespace-nowrap lg:min-h-9 border-b-2 px-3 text-[0.95rem] transition-colors lg:border-b-0 lg:border-l-2 ${
               active ? "border-bisturi font-medium text-bisturi" : "border-transparent text-cafe hover:text-espresso"
             }`}
           >

@@ -1,26 +1,32 @@
-# Financeiro (Etapa 6): estado
+# Financeiro (Etapa 6) e Tratamentos (Etapa 5): estado
 
-Telas concluídas em 2026-09-26. Este arquivo registra o que falta para colocar no ar.
+Telas das duas etapas concluídas em 2026-09-26. Este arquivo registra o que falta para colocar no ar.
 
 ## Pronto e verificado
-- Migração 6 (`supabase/migrations/20260927100000_financeiro.sql`), regras puras, carregadores e ações, com 20 testes de SQL e 25 unitários próprios.
+
+**Financeiro (Etapa 6)**
+- Migração 6, regras puras, carregadores e ações, com testes próprios.
 - Telas em `src/app/admin/(painel)/financeiro/`: visão geral, recebimentos (lista e detalhe), despesas (lista e detalhe, categorias, repetir recorrentes), relatórios e `exportar` (CSV; 401 sem login).
-- Componentes em `src/components/admin/finance/`.
-- Ficha da cliente: aba **Financeiro**, linha "Financeiro" no Resumo e evento "Recebimento" na linha do tempo.
-- Detalhe do agendamento: "Registrar pagamento" (formulário já ligado ao atendimento; a URL só leva o id, o resto é relido do banco).
-- Menu: item "Financeiro".
-- QA em navegador com dados demonstrativos: 23 fluxos passaram (receber, parcelar 1.000 em 3x = 333,33 / 333,33 / 333,34, recebido à vista, recusa sem forma de pagamento, despesa e pagamento, recorrentes sem duplicar, CSV, ficha, atalho do agendamento). Sem rolagem horizontal em 320, 375, 390, 430 e 1280 px.
-- `npm run lint`, `npm run typecheck`, `npm test` (50 unitários + 88 SQL) e `npm run build`: passam.
+- Ficha da cliente: aba **Financeiro**, linha no Resumo e evento "Recebimento" na linha do tempo. Detalhe do agendamento: "Registrar pagamento".
+
+**Tratamentos (Etapa 5)**
+- Migração 7 (`cancel_treatment`, `pause_treatment`, `save_package_services`), com 16 testes de SQL (inclui permissões: anônimo barrado, não-admin não enxerga nada).
+- `src/lib/treatment.ts` (regras puras, 20 testes unitários), `src/lib/treatment-data.ts` (carregadores).
+- Telas: `/admin/pacotes` (catálogo, serviços em ordem), `/admin/tratamentos` (lista com progresso e próxima sessão) e `/admin/tratamentos/[id]` (iniciar, pausar, retomar, cancelar, agendar e remarcar sessões, marcar como realizada com nota, evolução, parcelas, edição). Aba **Tratamentos** na ficha da cliente e sessões realizadas na linha do tempo.
+
+**Verificação (2026-09-26)**
+- `npm run lint`, `npm run typecheck`, `npm test` (70 unitários + 104 SQL), `npm run build` e `node scripts/verify-bundle.mjs` (anônimo barrado nas funções administrativas, inclusive as três novas): passam.
+- Navegador, com dados demonstrativos: 23 fluxos do financeiro e 32 fluxos de tratamentos, todos passando. Sem rolagem horizontal em 320, 375, 390, 430 e 1280 px.
 
 ## Falta
-1. **Aplicar a migração 6 no Supabase real** (SQL Editor, só ela; `npm run db:bundle` já a inclui no arquivo completo). Sem isso, as telas do financeiro falham em produção porque as funções não existem.
-2. **Teste ao vivo no Supabase**, com dados fictícios (nomes "Exemplo", telefone `009…`) e limpeza depois. Nunca rodou contra um Supabase real.
-3. **Etapa 5**: a interface de pacotes, tratamentos, sessões e evolução. Sem ela, "Gerar parcelas do tratamento" e o vínculo com tratamento no recebimento só aparecem quando existir um tratamento (hoje, só no demo).
-4. **Etapa 7**: o dashboard ainda não mostra o financeiro.
+1. **Aplicar as migrações 6 e 7 no Supabase real** (SQL Editor, nessa ordem; `npm run db:bundle` já as inclui no arquivo completo). Sem isso, as telas de financeiro e de tratamentos falham em produção porque as funções não existem.
+2. **Teste ao vivo no Supabase**, com dados fictícios (nomes "Exemplo", telefone `009…`) e limpeza depois. Nada disso rodou contra um Supabase real. Ponto a observar: chamadas de função com lista de ids (`save_package_services`) passam pelo cliente do Supabase, que só foi exercitado no banco local.
+3. **Etapa 7**: o dashboard ainda não mostra financeiro nem tratamentos.
+4. Fotos de evolução: a coluna existe, o upload ainda não (deve ir para um bucket **privado**).
 
 ## Decisões mantidas
 - Valores em reais, somas em centavos; parser de dinheiro BR (`parseMoney`).
-- "Receber" exige forma de pagamento (relatórios por forma dependem dela).
-- Recebimento pago não é apagado: desfazer antes. Estorno (`refunded`) fica fora da interface.
+- "Receber" exige forma de pagamento. Recebimento pago não é apagado: desfazer antes. Estorno fica fora da interface.
+- Cancelar tratamento **não mexe nas cobranças**: o que fazer com o dinheiro é decisão da Jennifer, no Financeiro.
+- Sessão realizada não volta atrás. Pacote é copiado para o tratamento: editar o pacote não altera tratamentos existentes.
 - Sem biblioteca de gráfico: barras finas em CSS. Sem cartões de KPI.
-- Listas do mês usam a mesma regra do caixa (pago pela data do pagamento; previsto pelo vencimento) e duas consultas limitadas, não a tabela inteira.

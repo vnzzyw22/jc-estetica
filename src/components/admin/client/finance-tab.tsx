@@ -85,9 +85,9 @@ export function FinanceTab({ file, today, receiving }: Props) {
             <p className="t-small mb-4 max-w-[52ch]">Divide o valor do tratamento em parcelas mensais. A última absorve os centavos.</p>
             <div className="grid gap-8">
               {billable.map((t) => (
-                <AdminForm key={t.id} action={createPlanAction} submitLabel="Gerar parcelas" className="grid max-w-lg gap-4 sm:grid-cols-3">
+                <AdminForm key={t.id} action={createPlanAction} submitLabel="Gerar parcelas" className="grid max-w-lg gap-4 sm:grid-cols-2">
                   <input type="hidden" name="treatment_id" value={t.id} />
-                  <p className="sm:col-span-3">
+                  <p className="sm:col-span-2">
                     <span className="font-medium">{t.name}</span> <span className="tnum t-small">{formatMoney(t.price_total ?? 0)}</span>
                   </p>
                   <Field label="Parcelas">
@@ -96,7 +96,7 @@ export function FinanceTab({ file, today, receiving }: Props) {
                   <Field label="1º vencimento">
                     <input name="first_due" type="date" defaultValue={today} className="field tnum" />
                   </Field>
-                  <Field label="Forma">
+                  <Field label="Forma de pagamento" className="sm:col-span-2">
                     <select name="method" defaultValue="" className="field">
                       <MethodOptions optional />
                     </select>
